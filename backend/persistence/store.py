@@ -5,6 +5,8 @@ No automatic remote migrations/seeding. CLI operations require explicit invocati
 import json
 import os
 import sqlite3
+from datetime import datetime, timezone
+from uuid import uuid5, NAMESPACE_URL
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -38,9 +40,8 @@ class Store:
 
     def initialize(self):
         if self.url:
-            # Validate schema availability, never modify a configured DB at startup.
-            with self.connect() as conn:
-                conn.execute('SELECT id FROM projects LIMIT 1')
+            # Configured remote databases are read-only at application startup.
+            # Explicit migration and verification commands prepare them.
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as conn:
@@ -52,7 +53,34 @@ class Store:
             CREATE TABLE IF NOT EXISTS harmonized_records(id TEXT,run_id TEXT REFERENCES harmonization_runs(id),feature TEXT,PRIMARY KEY(run_id,id));
             CREATE TABLE IF NOT EXISTS review_cases(id TEXT PRIMARY KEY,run_id TEXT,record_id TEXT,status TEXT DEFAULT 'pending',decision TEXT,reviewer TEXT,note TEXT,decided_at TEXT,FOREIGN KEY(run_id,record_id) REFERENCES harmonized_records(run_id,id));
             CREATE TABLE IF NOT EXISTS audit_events(id INTEGER PRIMARY KEY,project_id TEXT,run_id TEXT,record_id TEXT,actor TEXT,action TEXT,before_data TEXT,after_data TEXT,created_at TEXT);
+            CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
             ''')
+            if 'version' not in {row[1] for row in conn.execute('PRAGMA table_info(review_cases)')}:
+                conn.execute('ALTER TABLE review_cases ADD COLUMN version INTEGER NOT NULL DEFAULT 0')
+            conn.executescript('''
+            CREATE UNIQUE INDEX IF NOT EXISTS review_case_record_unique ON review_cases(run_id,record_id);
+            CREATE INDEX IF NOT EXISTS audit_run_record_idx ON audit_events(run_id,record_id,id);
+            CREATE TRIGGER IF NOT EXISTS audit_no_update BEFORE UPDATE ON audit_events
+              BEGIN SELECT RAISE(ABORT,'Audit events are append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS audit_no_delete BEFORE DELETE ON audit_events
+              BEGIN SELECT RAISE(ABORT,'Audit events are append-only'); END;
+            CREATE TRIGGER IF NOT EXISTS audit_valid_reference BEFORE INSERT ON audit_events
+              WHEN NOT EXISTS (SELECT 1 FROM harmonization_runs r JOIN harmonized_records h ON h.run_id=r.id
+                WHERE r.id=NEW.run_id AND r.project_id=NEW.project_id AND h.id=NEW.record_id)
+              BEGIN SELECT RAISE(ABORT,'Invalid audit reference'); END;
+            CREATE TRIGGER IF NOT EXISTS review_valid_insert BEFORE INSERT ON review_cases
+              WHEN NEW.status NOT IN ('pending','resolved','investigating') OR NEW.version<0
+                OR (NEW.decision IS NOT NULL AND NEW.decision NOT IN ('accepted','rejected','investigate'))
+              BEGIN SELECT RAISE(ABORT,'Invalid review state'); END;
+            CREATE TRIGGER IF NOT EXISTS review_valid_update BEFORE UPDATE ON review_cases
+              WHEN NOT ((NEW.status='resolved' AND NEW.decision IN ('accepted','rejected')) OR
+                (NEW.status='investigating' AND NEW.decision='investigate'))
+                OR NEW.reviewer IS NULL OR length(trim(NEW.reviewer))=0 OR NEW.decided_at IS NULL OR NEW.version<1
+              BEGIN SELECT RAISE(ABORT,'Invalid review state'); END;
+            ''')
+            conn.execute("INSERT OR IGNORE INTO schema_migrations(version) VALUES ('001_foundation.sql')")
+            conn.execute("INSERT OR IGNORE INTO schema_migrations(version) VALUES ('002_review_audit.sql')")
+        self.backfill_reviews()
 
     @staticmethod
     def decode(value):
@@ -109,8 +137,9 @@ class Store:
                 (run['id'],'pune-demo',run['status'],json.dumps(run)))
             if features is not None:
                 for f in features:
-                    c.execute(self.sql('INSERT INTO harmonized_records(id,run_id,feature) VALUES (?,?,?)'),
+                    c.execute(self.sql('INSERT INTO harmonized_records(id,run_id,feature) VALUES (?,?,?) ON CONFLICT(run_id,id) DO NOTHING'),
                               (f['properties']['parcel_id'],run['id'],json.dumps(f)))
+                self.ensure_reviews(c,run['id'])
 
     def runs(self):
         with self.connect() as c:
@@ -120,3 +149,90 @@ class Store:
     def results(self, run_id):
         with self.connect() as c:
             return [self.decode(r[0]) for r in c.execute(self.sql('SELECT feature FROM harmonized_records WHERE run_id=? ORDER BY id'),(run_id,)).fetchall()]
+
+    def ensure_reviews(self, c, run_id):
+        rows=c.execute(self.sql('SELECT id,feature FROM harmonized_records WHERE run_id=?'),(run_id,)).fetchall()
+        for record_id,raw in rows:
+            p=self.decode(raw)['properties']
+            if p.get('review_required'):
+                case_id=str(uuid5(NAMESPACE_URL,f'bhumi-setu:{run_id}:{record_id}'))
+                c.execute(self.sql("INSERT INTO review_cases(id,run_id,record_id,status,version) VALUES (?,?,?,'pending',0) ON CONFLICT(run_id,record_id) DO NOTHING"),
+                          (case_id,run_id,record_id))
+
+    def backfill_reviews(self):
+        with self.connect() as c:
+            for (run_id,) in c.execute("SELECT id FROM harmonization_runs WHERE status='completed'").fetchall():
+                self.ensure_reviews(c,run_id)
+
+    def review_cases(self, run_id):
+        with self.connect() as c:
+            rows=c.execute(self.sql('''SELECT q.id,q.run_id,q.record_id,q.status,q.decision,q.reviewer,q.note,q.decided_at,q.version,h.feature
+                FROM review_cases q JOIN harmonized_records h ON h.run_id=q.run_id AND h.id=q.record_id
+                WHERE q.run_id=? ORDER BY q.record_id'''),(run_id,)).fetchall()
+            return [self.case_dict(r) for r in rows]
+
+    def case_dict(self,row):
+        keys=('id','run_id','record_id','status','decision','reviewer','note','decided_at','version','feature')
+        result=dict(zip(keys,row))
+        result['feature']=self.decode(result['feature'])
+        if result['decided_at'] is not None:
+            result['decided_at']=str(result['decided_at'])
+        return result
+
+    def review_case(self, case_id):
+        with self.connect() as c:
+            row=c.execute(self.sql('''SELECT q.id,q.run_id,q.record_id,q.status,q.decision,q.reviewer,q.note,q.decided_at,q.version,h.feature
+                FROM review_cases q JOIN harmonized_records h ON h.run_id=q.run_id AND h.id=q.record_id WHERE q.id=?'''),(case_id,)).fetchone()
+            return self.case_dict(row) if row else None
+
+    def decide(self, case_id, decision, reviewer, note, expected_version):
+        choices={'accept':'accepted','reject':'rejected','investigate':'investigate'}
+        if decision not in choices or not reviewer.strip():
+            raise ValueError('Invalid decision or reviewer')
+        with self.connect() as c:
+            if not self.url:
+                c.execute('BEGIN IMMEDIATE')
+            suffix=' FOR UPDATE OF q' if self.url else ''
+            row=c.execute(self.sql('''SELECT q.id,q.run_id,q.record_id,q.status,q.decision,q.reviewer,q.note,q.decided_at,q.version,h.feature
+                FROM review_cases q JOIN harmonized_records h ON h.run_id=q.run_id AND h.id=q.record_id WHERE q.id=?''')+suffix,(case_id,)).fetchone()
+            if not row:
+                raise LookupError('Review case not found')
+            before=self.case_dict(row)
+            if before['version']!=expected_version:
+                raise ReviewConflict('This case changed. Reload its current decision before submitting again.')
+            if decision=='accept' and not before['feature']['properties'].get('matched_footprint_id'):
+                raise ValueError('No candidate exists to accept. Reject or investigate this case.')
+            timestamp=datetime.now(timezone.utc).isoformat()
+            state='investigating' if decision=='investigate' else 'resolved'
+            after={k:v for k,v in before.items() if k!='feature'}
+            after.update(status=state,decision=choices[decision],reviewer=reviewer.strip(),note=note,
+                         decided_at=timestamp,version=expected_version+1)
+            c.execute(self.sql('''UPDATE review_cases SET status=?,decision=?,reviewer=?,note=?,decided_at=?,version=? WHERE id=?'''),
+                      (state,choices[decision],reviewer.strip(),note,timestamp,expected_version+1,case_id))
+            project=c.execute(self.sql('SELECT project_id FROM harmonization_runs WHERE id=?'),(before['run_id'],)).fetchone()[0]
+            c.execute(self.sql('''INSERT INTO audit_events(project_id,run_id,record_id,actor,action,before_data,after_data,created_at)
+                VALUES (?,?,?,?,?,?,?,?)'''),(project,before['run_id'],before['record_id'],reviewer.strip(),f'review.{decision}',
+                    json.dumps({k:v for k,v in before.items() if k!='feature'}),json.dumps(after),timestamp))
+            return {**after,'feature':before['feature']}
+
+    def audit(self, run_id=None, record_id=None, limit=100, offset=0):
+        clauses,params=[],[]
+        for field,value in [('run_id',run_id),('record_id',record_id)]:
+            if value:
+                clauses.append(field+'=?'); params.append(value)
+        where=' WHERE '+' AND '.join(clauses) if clauses else ''
+        with self.connect() as c:
+            total=c.execute(self.sql('SELECT count(*) FROM audit_events'+where),tuple(params)).fetchone()[0]
+            rows=c.execute(self.sql('''SELECT id,project_id,run_id,record_id,actor,action,before_data,after_data,created_at
+                FROM audit_events'''+where+' ORDER BY id DESC LIMIT ? OFFSET ?'),tuple(params+[limit,offset])).fetchall()
+            events=[]
+            for row in rows:
+                event=dict(zip(('id','project_id','run_id','record_id','actor','action','before','after','timestamp'),row))
+                event['before']=self.decode(event['before']);event['after']=self.decode(event['after'])
+                event['timestamp']=str(event['timestamp'])
+                events.append(event)
+            return {'events':events,'total':total,'limit':limit,'offset':offset}
+
+
+class ReviewConflict(Exception):
+    pass

@@ -29,6 +29,18 @@ test('real backend workflow, evidence, persisted reload, and responsive layouts'
  await page.getByRole('button',{name:'Close evidence'}).click();
  await page.getByRole('combobox').selectOption('conflict');
  await expect(page.locator('.record-list button')).not.toHaveCount(0);
+ await page.goto('/review');
+ await expect(page.getByRole('heading',{name:'Review queue'})).toBeVisible();
+ await page.locator('.case-row').first().click();
+ await page.getByLabel('Reviewer identifier').fill('browser-officer');
+ await page.getByRole('button',{name:'Reject'}).click();
+ await expect(page.getByText('Decision persisted to the backend')).toBeVisible();
+ await page.reload();
+ await page.getByRole('button',{name:/resolved/}).click();
+ await expect(page.getByText('rejected',{exact:true}).first()).toBeVisible();
+ await page.goto('/audit');
+ await expect(page.getByRole('heading',{name:'Audit trail'})).toBeVisible();
+ await expect(page.getByRole('article').filter({hasText:'REJECT'}).first()).toBeVisible();
  for(const size of [{width:768,height:1024},{width:390,height:844}]){
   await page.setViewportSize(size);
   for(const route of ['/','/data-sources','/map','/harmonization']){

@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 from services.sources import prepare_source, display_layer
 from services.reconciliation import execute
+from persistence.verification import verify
+from persistence.store import ReviewConflict
 
 router = APIRouter(prefix='/api')
 run_lock = Lock()
@@ -19,11 +21,14 @@ def store(request):
 @router.get('/health')
 def health(request: Request):
     db = store(request)
-    try:
-        db.sources()
-    except Exception:
-        raise HTTPException(503,'Database unavailable')
-    return {'status':'ok','storage_mode':db.mode,'postgis_connected':bool(db.url),'synthetic':True}
+    checked = verify(db)
+    return {'status':'ok' if checked['database_reachable'] else 'degraded', 'storage_mode':db.mode, 'synthetic':True,
+            'postgis_connected':checked['postgis_available'], **checked}
+
+
+@router.get('/database/verify')
+def database_verify(request: Request):
+    return verify(store(request))
 
 
 @router.get('/sources')
@@ -105,6 +110,61 @@ def results(request: Request,run_id: str | None=None):
     selected = run(run_id,request) if run_id else (completed[0] if completed else None)
     return {'type':'FeatureCollection', 'features':store(request).results(selected['id']) if selected else [],
             'run_id':selected['id'] if selected else None,'summary':selected.get('summary') if selected else None}
+
+
+def selected_run_id(request: Request, run_id: str | None):
+    if run_id:
+        if not next((r for r in store(request).runs() if r['id']==run_id),None):
+            raise HTTPException(404,'Run not found')
+        return run_id
+    completed=[r for r in store(request).runs() if r['status']=='completed']
+    if not completed:
+        raise HTTPException(404,'No completed harmonization run')
+    return completed[0]['id']
+
+
+@router.get('/review-cases')
+def review_cases(request: Request, run_id: str | None=None, status: str | None=None):
+    cases=store(request).review_cases(selected_run_id(request,run_id))
+    if status:
+        if status not in {'pending','investigating','resolved'}:
+            raise HTTPException(422,'Invalid review status')
+        cases=[c for c in cases if c['status']==status]
+    return {'cases':cases,'total':len(cases),'run_id':run_id or cases[0]['run_id'] if cases else run_id}
+
+
+@router.get('/review-cases/{case_id}')
+def review_case(case_id: str, request: Request):
+    case=store(request).review_case(case_id)
+    if not case:
+        raise HTTPException(404,'Review case not found')
+    return case
+
+
+class DecisionInput(BaseModel):
+    decision: Literal['accept','reject','investigate']
+    reviewer: str = Field(min_length=1,max_length=120)
+    note: str | None = Field(default=None,max_length=2000)
+    expected_version: int = Field(ge=0)
+
+
+@router.patch('/review-cases/{case_id}')
+def decide_review(case_id: str, payload: DecisionInput, request: Request):
+    try:
+        return store(request).decide(case_id,payload.decision,payload.reviewer,payload.note,payload.expected_version)
+    except LookupError as exc:
+        raise HTTPException(404,str(exc))
+    except ReviewConflict as exc:
+        raise HTTPException(409,str(exc))
+    except ValueError as exc:
+        raise HTTPException(422,str(exc))
+
+
+@router.get('/audit')
+def audit(request: Request, run_id: str | None=None, record_id: str | None=None, limit: int=100, offset: int=0):
+    if not 1 <= limit <= 500 or offset < 0:
+        raise HTTPException(422,'Invalid pagination')
+    return store(request).audit(run_id,record_id,limit,offset)
 
 
 @router.post('/harmonize')

@@ -5,7 +5,7 @@
 SIH26013 — Automated Integration & Intelligent Harmonization of Multi-source
 Geospatial Data for Urban Land Record Management.
 
-Phase 3 foundation. All included geography, ownership records and survey
+Phase 4 foundation. All included geography, ownership records and survey
 observations are a **Synthetic demonstration dataset**, generated near Pune.
 There is no trained ML, imagery inference or official land record in this demo.
 
@@ -77,7 +77,8 @@ Backend CORS origins use `CORS_ORIGINS` in `backend/.env`.
 - Data source creation via JSON API; upload/mapping/source-selection UI is deferred.
 - PostGIS schema: projects, data_sources, source_features, harmonization_runs,
   harmonized_records, review_cases, audit_events.
-- Review, audit and full data-quality UI remain visibly planned for Phase 4.
+- Persistent review queue with optimistic version checks and append-only audit events.
+- Audit trail screen showing reviewer, action, record, timestamp, before/after state and note.
 
 The generated scenarios include strong correspondence, fuzzy attribute variations,
 partial overlap, displacement, missing buildings, GNSS containment and survey
@@ -127,6 +128,7 @@ and real evaluation data, not an assumption that their boundaries should coincid
 | Method | Endpoint | Behavior |
 |---|---|---|
 | GET | /api/health | Storage mode and availability |
+| GET | /api/database/verify | Safe PostGIS/schema/geometry verification status |
 | GET | /api/sources | Actual source metadata and quality counts |
 | POST | /api/sources | Prepare/store synthetic GeoJSON input |
 | GET | /api/sources/{id} | One source's metadata |
@@ -138,6 +140,10 @@ and real evaluation data, not an assumption that their boundaries should coincid
 | GET | /api/layers/gnss | Normalized WGS84 observations |
 | GET | /api/results | Latest completed run; optional run_id |
 | POST | /api/harmonize | Compatibility wrapper; returns GeoJSON |
+| GET | /api/review-cases | Persistent cases, optionally filtered by run/status |
+| GET | /api/review-cases/{id} | One review case with evidence |
+| PATCH | /api/review-cases/{id} | Accept, reject or investigate with reviewer and expected version |
+| GET | /api/audit | Append-only review audit events |
 
 POST /api/sources accepts `name`, `kind`, `source_crs`, `collection`.
 Only EPSG:4326/EPSG:32643 and 1–5,000 features per source are supported in this
@@ -160,12 +166,27 @@ If absent, install it with `npx.cmd playwright install chromium`.
 Tests generate screenshots under ignored `artifacts/` and use isolated temporary
 SQLite stores for backend checks. Browser tests add real runs to the local demo.
 
-## Phase 4
+## Phase 4 persistence and verification
 
-Connect the separate MVP PostGIS database and verify schema, seeding, candidate
-parity and restart persistence. Then implement backend review cases/decisions,
-review notes, audit events and the corresponding screens. Add an import UI and
-source-selection controls after the default demonstration is stable.
+The default local mode is SQLite and is **verified locally** for run persistence,
+review decisions, optimistic conflicts and audit history across restart. It is a
+demo adapter and does not provide PostGIS functions. The dedicated MVP
+PostgreSQL/PostGIS database is **not configured, so live PostGIS verification is
+not yet verified**. `/api/database/verify` reports this without exposing a URL or
+credentials.
+
+When the separate MVP database is supplied, configure only `backend/.env`, then
+run the explicitly confirmed commands (from `backend`):
+
+```powershell
+.venv\Scripts\python -m persistence.manage verify --confirm-mvp-database
+.venv\Scripts\python -m persistence.manage migrate --confirm-mvp-database
+.venv\Scripts\python -m persistence.manage seed --confirm-mvp-database
+```
+
+Review decisions are written by the API only after validation and version checks.
+Each accepted, rejected or investigating decision appends an audit event in the
+same transaction. No browser state or localStorage is treated as persistence.
 
 Deferred: authentication, enterprise permissions, municipal/utility federation,
 distributed jobs, advanced change detection, drone/ORI processing and ML.

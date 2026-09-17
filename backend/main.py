@@ -25,7 +25,7 @@ def create_app(database=None):
     app = FastAPI(title='BHUMI-SETU',description='Explainable rule/evidence-based reconciliation. Synthetic demonstration dataset.',lifespan=lifespan)
     app.add_middleware(CORSMiddleware,
         allow_origins=os.getenv('CORS_ORIGINS','http://localhost:5173,http://127.0.0.1:5173').split(','),
-        allow_methods=['GET','POST'],allow_headers=['Content-Type'])
+        allow_methods=['GET','POST','PATCH','OPTIONS'],allow_headers=['Content-Type'])
     app.include_router(router)
 
     @app.get('/')
