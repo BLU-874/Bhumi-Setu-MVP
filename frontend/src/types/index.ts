@@ -1,0 +1,11 @@
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+export type Status = 'matched' | 'needs_review' | 'conflict';
+export type Source = {id:string;kind:'cadastral'|'buildings'|'gnss';name:string;label:string;feature_count:number;source_crs:string;analysis_crs:string;display_crs:string;fields:string[];status:string;quality:Record<string,number>};
+export type Summary = {total_parcels:number;matched:number;needs_review:number;conflict:number;avg_confidence:number;review_required:number};
+export type Run = {id:string;status:string;started_at:string;completed_at?:string;summary?:Summary;duration_seconds?:number;quality_flags?:Record<string,number>;stages:{name:string;status:string;detail?:string}[]};
+export type Health = {status:string;storage_mode:string;postgis_connected:boolean};
+export type Evidence = {source:unknown;candidate:unknown;available:boolean;similarity_pct:number|null};
+export type ResultProps = {parcel_id:string;status:Status;confidence:number;geometry_overlap_pct:number;attribute_match_pct:number;gnss_verified:boolean;gnss_point_id:string|null;cadastral:Record<string,unknown>;footprint_properties:Record<string,unknown>|null;matched_footprint_id:string|null;validation_flags:string[];recommendation:string;review_required:boolean;decision_status:string;attribute_evidence:Record<string,Evidence>;geometry_quality:{original_valid:boolean;repaired:boolean;result_valid:boolean;reason:string};validation:Record<string,unknown>;confidence_explanation:{geometry_contribution:number;attribute_contribution:number;base_confidence:number;gnss_boost:number;final_confidence:number}};
+export type ResultFeature = Feature<Geometry,ResultProps>;
+export type Results = FeatureCollection<Geometry,ResultProps> & {summary:Summary|null;run_id:string|null};
+export type Layers = {cadastral:FeatureCollection;buildings:FeatureCollection;gnss:FeatureCollection};

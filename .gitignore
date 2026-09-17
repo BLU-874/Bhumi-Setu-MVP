@@ -1,0 +1,16 @@
+backend/.venv/
+backend/.env
+backend/data/*.sqlite*
+backend/data/generated/
+backend/logs/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+__pycache__/
+.pytest_cache/
+*.pyc
+*.log
+artifacts/
+frontend/test-results/
+frontend/playwright-report/
+*.tsbuildinfo
