@@ -1,0 +1,43 @@
+{
+  "context": "Synthetic training benchmark \u2014 not a production accuracy estimate.",
+  "test": {
+    "logistic_regression": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          581,
+          0
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 581,
+      "threshold": 0.5
+    },
+    "hist_gradient_boosting": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          581,
+          0
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 581,
+      "threshold": 0.5
+    }
+  }
+}

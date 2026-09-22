@@ -5,7 +5,8 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
-from services.sources import prepare_source, display_layer
+from services.sources import prepare_source, display_layer, display_collection
+from services.reference_dataset import SOURCE_ID as REFERENCE_ID, prepared_reference, source_geometry_layer
 from services.reconciliation import execute
 from persistence.verification import verify
 from persistence.store import ReviewConflict
@@ -32,12 +33,16 @@ def database_verify(request: Request):
 
 
 @router.get('/sources')
-def sources(request: Request):
+def sources(request: Request, dataset_type: Literal['synthetic_benchmark','real_world_reference'] | None = None):
+    if dataset_type == 'real_world_reference':
+        return [prepared_reference()[0]]
     return store(request).sources()
 
 
 @router.get('/sources/{source_id}')
 def source(source_id: str, request: Request):
+    if source_id == REFERENCE_ID:
+        return prepared_reference()[0]
     item = next((s for s in store(request).sources() if s['id']==source_id),None)
     if not item:
         raise HTTPException(404,'Source not found')
@@ -47,14 +52,16 @@ def source(source_id: str, request: Request):
 class SourceInput(BaseModel):
     name: str = Field(min_length=1,max_length=120)
     kind: Literal['cadastral','buildings','gnss']
-    source_crs: Literal['EPSG:4326','EPSG:32643']
+    source_crs: Literal['EPSG:4326','EPSG:32643','EPSG:3857']
+    source_type: Literal['ai_derived_drone_footprint'] | None = None
     collection: dict
 
 
 @router.post('/sources', status_code=201)
 def add_source(payload: SourceInput, request: Request):
     try:
-        meta, features = prepare_source(payload.kind,payload.name,payload.source_crs,payload.collection)
+        meta, features = prepare_source(payload.kind,payload.name,payload.source_crs,payload.collection,
+                                        source_type=payload.source_type)
     except (ValueError,KeyError,TypeError,IndexError) as exc:
         raise HTTPException(422,str(exc))
     store(request).add_source(meta,features)
@@ -69,6 +76,8 @@ class RunInput(BaseModel):
 
 @router.post('/runs',status_code=201)
 def start_run(request: Request,payload: RunInput | None = None):
+    if REFERENCE_ID in (payload or RunInput()).model_dump().values():
+        raise HTTPException(422,'Lalpur reference data has no verified cadastral/GNSS correspondence; reconciliation is unavailable')
     if not run_lock.acquire(blocking=False):
         raise HTTPException(409,'A harmonization run is already processing')
     try:
@@ -96,11 +105,16 @@ def run(run_id: str,request: Request):
 
 
 @router.get('/layers/{kind}')
-def layer(kind: Literal['cadastral','buildings','gnss'],request: Request,source_id: str | None=None):
+def layer(kind: Literal['cadastral','buildings','gnss'],request: Request,source_id: str | None=None,
+          representation: Literal['processed','source']='processed'):
     sid = source_id or kind
     meta = source(sid,request)
     if meta['kind'] != kind:
         raise HTTPException(422,'Source type mismatch')
+    if sid == REFERENCE_ID:
+        return source_geometry_layer() if representation == 'source' else display_collection(prepared_reference()[1])
+    if representation == 'source':
+        raise HTTPException(422,'Source comparison is available for the bundled reference dataset')
     return display_layer(store(request),sid)
 
 

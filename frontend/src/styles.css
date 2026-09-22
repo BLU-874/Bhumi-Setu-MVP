@@ -41,3 +41,19 @@
  .source-metadata div{font-size:11px}
  .hero-note{font-size:10px}
 }
+
+/* Derived footprint source controls reuse existing panel and evidence styles. */
+.source-selection select { max-width:100%; }
+.source-selection .select-label { align-items:flex-start; }
+.provenance-row b { overflow-wrap:anywhere; min-width:0; }
+
+.workspace-modes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+.workspace-modes button{padding:10px 16px;border:1px solid #cbded6;border-radius:5px;background:white;color:#486d70;font-weight:600}
+.workspace-modes button[aria-pressed="true"]{background:#e1f5eb;border-color:#27a572;color:#196247}
+.reference-cards{margin:20px 0}.reference-cards p{font-size:12px;line-height:1.6;margin:10px 0;color:#597781}
+.reference-cards small{font-size:11px;color:#667c84}.reference-cards h2{min-height:0}
+.reference-provenance code{overflow-wrap:anywhere;word-break:break-word}
+.real-world-workspace .panel{margin-top:20px}.real-world-workspace .panel p{font-size:12px;line-height:1.7;margin:10px 0}
+.real-world-workspace .record-list{margin-top:16px}.real-world-workspace .map-bottom{flex-wrap:wrap}
+
+.basemap-message{position:absolute;top:12px;left:54px;right:12px;z-index:800;background:#fff9e8;color:#5e4315;border:1px solid #c7b789;padding:8px 12px;font-size:11px;pointer-events:none}.map-toolbar label{min-width:0}.leaflet-control-attribution{max-width:100%;overflow-wrap:anywhere}.workspace-map .map-caption{pointer-events:none}

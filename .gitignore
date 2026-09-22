@@ -11,6 +11,8 @@ __pycache__/
 *.pyc
 *.log
 artifacts/
+!backend/ml/artifacts/
+backend/ml/artifacts/dataset.json
 frontend/test-results/
 frontend/playwright-report/
 *.tsbuildinfo

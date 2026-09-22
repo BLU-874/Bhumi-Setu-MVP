@@ -1,0 +1,1388 @@
+{
+  "type": "FeatureCollection",
+  "dataset": {
+    "id": "lalpur-reference-v1",
+    "name": "Lalpur, Ahmedabad — Real-World Dataset",
+    "dataset_type": "real_world_reference",
+    "location": "Lalpur, Ahmedabad, Gujarat",
+    "source_type": "real_world_orthophoto_building_data",
+    "imagery_source": "ProjectVaayu reference dataset",
+    "synthetic": false,
+    "benchmark_eligible": false,
+    "cadastral_truth_available": false,
+    "reconciliation_ground_truth_available": false,
+    "gnss_available": false,
+    "representation": "staged_subset_of_original_vector_annotations",
+    "source_crs": "EPSG:3857",
+    "repository": "https://github.com/Kabeer2004/ProjectVaayu",
+    "repository_commit": "2050e9c2561bcd733db120771d79e3dfec93cc9d",
+    "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+    "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+    "source_files_sha256": {
+      "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+      "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shx": "4d0f31d7d3144bdc40e5fdc6db5c757bf6d331a72b75555c351bdcccad5e8b03",
+      "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.dbf": "c2458c84c9f18b4d3a1d78b6a1a2af28cabb57fb77b35305605e1ca3d417bbea",
+      "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.prj": "f2e7fb14d55bdd8d6a3bc2c272a48729d8f9d0ad72936e20eae6a9a81c2fccd0",
+      "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.cpg": "3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824",
+      "sample_data/ECW/ortho_lalpur(511638)_3857.ecw": "1e6cc91b5bfa12b3f5c167a8713c5a89f6b4a045c71dd6230eaaeb704efa48d6"
+    },
+    "source_prj": "PROJCS[\"WGS_1984_Web_Mercator_Auxiliary_Sphere\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Mercator_Auxiliary_Sphere\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",0.0],PARAMETER[\"Standard_Parallel_1\",0.0],PARAMETER[\"Auxiliary_Sphere_Type\",0.0],UNIT[\"Meter\",1.0]]",
+    "selection": "First 24 single-part Lalpur records by numeric objectid; exact coordinates, no simplification",
+    "available_lalpur_buildings": 317,
+    "staged_buildings": 24,
+    "imagery_status": "Reference ECW exists; not bundled or rendered",
+    "roads_status": "Reference polygon shapefile exists; not staged in the current building-source schema",
+    "annotation_origin": "README describes supplied shapefiles as manually created annotations; not new model predictions",
+    "license_status": "No explicit code/data licence found in the reference repository; redistribution permission is unverified",
+    "model_name": null,
+    "model_version": null,
+    "inference_run_id": null,
+    "segmentation_probability": null
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099130.386700001,
+              2636809.061999999
+            ],
+            [
+              8099151.6897,
+              2636814.2413999997
+            ],
+            [
+              8099154.4081000015,
+              2636803.0604000017
+            ],
+            [
+              8099133.105099998,
+              2636797.881099999
+            ],
+            [
+              8099130.386700001,
+              2636809.061999999
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314474",
+        "source_feature_id": "314474",
+        "source_record_number": 219,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099137.3028,
+              2636831.0746
+            ],
+            [
+              8099138.513300002,
+              2636823.2481999993
+            ],
+            [
+              8099138.5163,
+              2636823.1706999987
+            ],
+            [
+              8099138.9899,
+              2636811.1537000015
+            ],
+            [
+              8099115.474599998,
+              2636805.4364
+            ],
+            [
+              8099115.236499999,
+              2636816.0727000013
+            ],
+            [
+              8099125.555300001,
+              2636816.1521000005
+            ],
+            [
+              8099122.3803,
+              2636834.1702000014
+            ],
+            [
+              8099136.350299999,
+              2636836.472100001
+            ],
+            [
+              8099137.3028,
+              2636831.0746
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314475",
+        "source_feature_id": "314475",
+        "source_record_number": 139,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099144.605300002,
+              2636847.425900001
+            ],
+            [
+              8099114.442699999,
+              2636838.9327000007
+            ],
+            [
+              8099113.807700001,
+              2636840.837699998
+            ],
+            [
+              8099113.013999999,
+              2636860.284600001
+            ],
+            [
+              8099138.969700001,
+              2636867.7459000014
+            ],
+            [
+              8099144.605300002,
+              2636847.425900001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314476",
+        "source_feature_id": "314476",
+        "source_record_number": 278,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099150.161600001,
+              2636826.1532999985
+            ],
+            [
+              8099138.5163,
+              2636823.1706999987
+            ],
+            [
+              8099138.513300002,
+              2636823.2481999993
+            ],
+            [
+              8099137.3028,
+              2636831.0746
+            ],
+            [
+              8099148.891600002,
+              2636833.8526999988
+            ],
+            [
+              8099150.161600001,
+              2636826.1532999985
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314477",
+        "source_feature_id": "314477",
+        "source_record_number": 356,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099138.9899,
+              2636811.1537000015
+            ],
+            [
+              8099138.5163,
+              2636823.1706999987
+            ],
+            [
+              8099150.161600001,
+              2636826.1532999985
+            ],
+            [
+              8099153.019099999,
+              2636814.5645999983
+            ],
+            [
+              8099138.9899,
+              2636811.1537000015
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314478",
+        "source_feature_id": "314478",
+        "source_record_number": 352,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099127.924199998,
+              2636864.975900002
+            ],
+            [
+              8099123.995900001,
+              2636863.9734000005
+            ],
+            [
+              8099123.790199999,
+              2636864.7793999985
+            ],
+            [
+              8099116.510899998,
+              2636862.9217000008
+            ],
+            [
+              8099115.4945,
+              2636866.9045
+            ],
+            [
+              8099130.734499998,
+              2636870.793900002
+            ],
+            [
+              8099131.750999998,
+              2636866.8110999987
+            ],
+            [
+              8099127.7184000015,
+              2636865.7820000015
+            ],
+            [
+              8099127.924199998,
+              2636864.975900002
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314479",
+        "source_feature_id": "314479",
+        "source_record_number": 548,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099123.8539,
+              2636869.037900001
+            ],
+            [
+              8099123.378199998,
+              2636870.901900001
+            ],
+            [
+              8099124.975900002,
+              2636871.3095999993
+            ],
+            [
+              8099125.4516,
+              2636869.445700001
+            ],
+            [
+              8099123.8539,
+              2636869.037900001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314480",
+        "source_feature_id": "314480",
+        "source_record_number": 348,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099126.048300002,
+              2636869.598000001
+            ],
+            [
+              8099125.831599999,
+              2636870.4470000006
+            ],
+            [
+              8099129.606199998,
+              2636871.4103999995
+            ],
+            [
+              8099129.822900001,
+              2636870.5612999983
+            ],
+            [
+              8099126.048300002,
+              2636869.598000001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314481",
+        "source_feature_id": "314481",
+        "source_record_number": 498,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099118.1481,
+              2636829.1845999993
+            ],
+            [
+              8099115.293200001,
+              2636829.0551000014
+            ],
+            [
+              8099115.0898,
+              2636833.5397999994
+            ],
+            [
+              8099117.944699999,
+              2636833.669300001
+            ],
+            [
+              8099118.1481,
+              2636829.1845999993
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314482",
+        "source_feature_id": "314482",
+        "source_record_number": 50,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099117.944699999,
+              2636833.669300001
+            ],
+            [
+              8099115.0898,
+              2636833.5397999994
+            ],
+            [
+              8099114.840100002,
+              2636839.0445999987
+            ],
+            [
+              8099117.664799999,
+              2636839.84
+            ],
+            [
+              8099117.944699999,
+              2636833.669300001
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314483",
+        "source_feature_id": "314483",
+        "source_record_number": 54,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099115.293200001,
+              2636829.0551000014
+            ],
+            [
+              8099118.1481,
+              2636829.1845999993
+            ],
+            [
+              8099118.7522,
+              2636816.0997
+            ],
+            [
+              8099115.881900001,
+              2636816.0775999986
+            ],
+            [
+              8099115.293200001,
+              2636829.0551000014
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314484",
+        "source_feature_id": "314484",
+        "source_record_number": 38,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099125.555300001,
+              2636816.1521000005
+            ],
+            [
+              8099118.7522,
+              2636816.0997
+            ],
+            [
+              8099118.5295,
+              2636820.923300002
+            ],
+            [
+              8099124.6679,
+              2636821.1876999997
+            ],
+            [
+              8099125.555300001,
+              2636816.1521000005
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314485",
+        "source_feature_id": "314485",
+        "source_record_number": 140,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099115.474599998,
+              2636805.4364
+            ],
+            [
+              8099123.585900001,
+              2636807.408500001
+            ],
+            [
+              8099124.966400001,
+              2636800.7718
+            ],
+            [
+              8099115.758900002,
+              2636798.9858999997
+            ],
+            [
+              8099115.474599998,
+              2636805.4364
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314486",
+        "source_feature_id": "314486",
+        "source_record_number": 292,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099128.9646000005,
+              2636808.7162000015
+            ],
+            [
+              8099130.257599998,
+              2636803.397999998
+            ],
+            [
+              8099124.709100001,
+              2636802.0089999996
+            ],
+            [
+              8099123.585900001,
+              2636807.408500001
+            ],
+            [
+              8099128.9646000005,
+              2636808.7162000015
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314487",
+        "source_feature_id": "314487",
+        "source_record_number": 530,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099119.632399999,
+              2636792.2589000016
+            ],
+            [
+              8099115.897399999,
+              2636791.7949
+            ],
+            [
+              8099115.729800001,
+              2636797.0874999985
+            ],
+            [
+              8099119.037099998,
+              2636797.418200001
+            ],
+            [
+              8099119.632399999,
+              2636792.2589000016
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314488",
+        "source_feature_id": "314488",
+        "source_record_number": 87,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099115.897399999,
+              2636791.7949
+            ],
+            [
+              8099119.632399999,
+              2636792.2589000016
+            ],
+            [
+              8099123.998,
+              2636792.754999999
+            ],
+            [
+              8099125.3871,
+              2636786.471099999
+            ],
+            [
+              8099116.126699999,
+              2636784.5529000014
+            ],
+            [
+              8099115.897399999,
+              2636791.7949
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314489",
+        "source_feature_id": "314489",
+        "source_record_number": 407,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099149.3915,
+              2636782.1121000014
+            ],
+            [
+              8099149.427999999,
+              2636781.9349000007
+            ],
+            [
+              8099121.6631000005,
+              2636774.4946999997
+            ],
+            [
+              8099122.787599999,
+              2636769.798300002
+            ],
+            [
+              8099119.612599999,
+              2636769.1369000003
+            ],
+            [
+              8099122.059999999,
+              2636759.7441999987
+            ],
+            [
+              8099125.499499999,
+              2636760.6039999984
+            ],
+            [
+              8099127.1664,
+              2636754.1719999984
+            ],
+            [
+              8099127.483899999,
+              2636752.3464
+            ],
+            [
+              8099117.588500001,
+              2636752.055300001
+            ],
+            [
+              8099116.4243,
+              2636779.2545999996
+            ],
+            [
+              8099148.1215,
+              2636787.5890000015
+            ],
+            [
+              8099149.3915,
+              2636782.1121000014
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314490",
+        "source_feature_id": "314490",
+        "source_record_number": 314,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099138.834600002,
+              2636757.5058000013
+            ],
+            [
+              8099127.1664,
+              2636754.1719999984
+            ],
+            [
+              8099125.499499999,
+              2636760.6039999984
+            ],
+            [
+              8099122.059999999,
+              2636759.7441999987
+            ],
+            [
+              8099119.612599999,
+              2636769.1369000003
+            ],
+            [
+              8099122.787599999,
+              2636769.798300002
+            ],
+            [
+              8099121.6631000005,
+              2636774.4946999997
+            ],
+            [
+              8099132.849100001,
+              2636777.4921999983
+            ],
+            [
+              8099136.2151999995,
+              2636764.3082000017
+            ],
+            [
+              8099140.845400002,
+              2636765.3665999994
+            ],
+            [
+              8099142.035999998,
+              2636760.6702000014
+            ],
+            [
+              8099145.5418,
+              2636761.530099999
+            ],
+            [
+              8099146.070900001,
+              2636759.479600001
+            ],
+            [
+              8099138.834600002,
+              2636757.5058000013
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314491",
+        "source_feature_id": "314491",
+        "source_record_number": 386,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099138.834600002,
+              2636757.5058000013
+            ],
+            [
+              8099146.070900001,
+              2636759.479600001
+            ],
+            [
+              8099145.5418,
+              2636761.530099999
+            ],
+            [
+              8099142.035999998,
+              2636760.6702000014
+            ],
+            [
+              8099140.845400002,
+              2636765.3665999994
+            ],
+            [
+              8099136.2151999995,
+              2636764.3082000017
+            ],
+            [
+              8099132.849100001,
+              2636777.4921999983
+            ],
+            [
+              8099149.427999999,
+              2636781.9349000007
+            ],
+            [
+              8099154.828699999,
+              2636783.382100001
+            ],
+            [
+              8099160.265900001,
+              2636762.9032999985
+            ],
+            [
+              8099156.376499999,
+              2636761.9508000016
+            ],
+            [
+              8099156.693999998,
+              2636760.918900002
+            ],
+            [
+              8099139.072700001,
+              2636756.235800002
+            ],
+            [
+              8099138.834600002,
+              2636757.5058000013
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314492",
+        "source_feature_id": "314492",
+        "source_record_number": 116,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099127.483899999,
+              2636752.3464
+            ],
+            [
+              8099127.1664,
+              2636754.1719999984
+            ],
+            [
+              8099138.834600002,
+              2636757.5058000013
+            ],
+            [
+              8099139.072700001,
+              2636756.235800002
+            ],
+            [
+              8099141.236000001,
+              2636756.8106999993
+            ],
+            [
+              8099141.533300001,
+              2636755.0874999985
+            ],
+            [
+              8099137.141199999,
+              2636753.9761999995
+            ],
+            [
+              8099137.352899998,
+              2636752.600400001
+            ],
+            [
+              8099127.483899999,
+              2636752.3464
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314493",
+        "source_feature_id": "314493",
+        "source_record_number": 499,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099159.918900002,
+              2636787.850900002
+            ],
+            [
+              8099161.5064,
+              2636781.6992999986
+            ],
+            [
+              8099158.4136000015,
+              2636780.9012
+            ],
+            [
+              8099156.826099999,
+              2636787.0527999997
+            ],
+            [
+              8099159.918900002,
+              2636787.850900002
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314494",
+        "source_feature_id": "314494",
+        "source_record_number": 199,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099158.2115,
+              2636770.6407000013
+            ],
+            [
+              8099156.6829,
+              2636776.3982000016
+            ],
+            [
+              8099158.8609,
+              2636776.976399999
+            ],
+            [
+              8099160.3895,
+              2636771.2190000005
+            ],
+            [
+              8099158.2115,
+              2636770.6407000013
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314495",
+        "source_feature_id": "314495",
+        "source_record_number": 119,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099160.639899999,
+              2636770.9968999997
+            ],
+            [
+              8099164.391199999,
+              2636771.9816000015
+            ],
+            [
+              8099165.5024,
+              2636767.748300001
+            ],
+            [
+              8099161.751200002,
+              2636766.7635999992
+            ],
+            [
+              8099160.639899999,
+              2636770.9968999997
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314496",
+        "source_feature_id": "314496",
+        "source_record_number": 45,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8099233.254999999,
+              2636827.3060000017
+            ],
+            [
+              8099231.308800001,
+              2636837.4957999997
+            ],
+            [
+              8099264.6477999985,
+              2636843.8632999994
+            ],
+            [
+              8099266.5940000005,
+              2636833.6735000014
+            ],
+            [
+              8099233.254999999,
+              2636827.3060000017
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "vaayu-building-314497",
+        "source_feature_id": "314497",
+        "source_record_number": 351,
+        "source_village": "Lalpur",
+        "source_district": "Ahmedabad",
+        "source_village_code": "511638",
+        "source_type": "real_world_orthophoto_building_data",
+        "dataset_id": "lalpur-reference-v1",
+        "source_file": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp",
+        "source_file_sha256": "95fbc5a015c4609c3c8144b3d65896e6c5de034c1b47982cbc43eafa96b41c98",
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "derived_from": "sample_data/ShapeFiles/LalPur/Gujarat_Build_Up_Area_Type.shp"
+      }
+    }
+  ]
+}

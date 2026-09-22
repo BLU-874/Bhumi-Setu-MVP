@@ -3,7 +3,7 @@ test('real backend workflow, evidence, persisted reload, and responsive layouts'
  const errors:string[]=[];
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
- await page.goto('/');
+ await page.goto('/overview');
  await expect(page.getByText('Local demo storage')).toBeVisible();
  await expect(page.getByText('500',{exact:false}).first()).toBeVisible();
  const completion=page.waitForResponse(r=>r.url().endsWith('/api/runs')&&r.request().method()==='POST');
@@ -25,6 +25,8 @@ test('real backend workflow, evidence, persisted reload, and responsive layouts'
  await page.locator('.record-list button').first().click();
  await expect(page.getByRole('complementary',{name:'Parcel evidence'})).toBeVisible();
  await expect(page.getByText('Confidence calculation',{exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Match ranking',exact:true})).toBeVisible();
+ await expect(page.getByText('Predicted match probability',{exact:true})).toBeVisible();
  await page.screenshot({path:'../artifacts/evidence-desktop.png',fullPage:true});
  await page.getByRole('button',{name:'Close evidence'}).click();
  await page.getByRole('combobox').selectOption('conflict');
@@ -43,11 +45,11 @@ test('real backend workflow, evidence, persisted reload, and responsive layouts'
  await expect(page.getByRole('article').filter({hasText:'REJECT'}).first()).toBeVisible();
  for(const size of [{width:768,height:1024},{width:390,height:844}]){
   await page.setViewportSize(size);
-  for(const route of ['/','/data-sources','/map','/harmonization']){
+  for(const route of ['/overview','/data-sources','/map','/harmonization']){
    await page.goto(route);
    await expect(page.getByText('Local demo storage')).toBeVisible();
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
-   if(route==='/')await page.screenshot({path:`../artifacts/dashboard-${size.width}.png`,fullPage:true});
+   if(route==='/overview')await page.screenshot({path:`../artifacts/dashboard-${size.width}.png`,fullPage:true});
    if(route==='/map'&&size.width===390){
     await page.locator('.record-list button').first().click();
     await expect(page.getByRole('complementary',{name:'Parcel evidence'})).toBeVisible();
@@ -60,5 +62,136 @@ test('real backend workflow, evidence, persisted reload, and responsive layouts'
  await expect(page.getByRole('link',{name:'Data sources',exact:true})).toBeVisible();
  await page.getByRole('link',{name:'Data sources',exact:true}).click();
  await expect(page.getByText('Different sources. Shared geography.')).toBeVisible();
+ expect(errors).toEqual([]);
+});
+
+
+test('staged drone source uses existing reconciliation, review and audit',async({page})=>{
+ const errors:string[]=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.goto('/data-sources');
+ await expect(page.getByText('Local demo storage')).toBeVisible();
+ const imported=page.waitForResponse(r=>r.url().endsWith('/api/sources')&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'Import staged drone fixture'}).click();
+ const response=await imported;
+ expect(response.status()).toBe(201);
+ const source=await response.json();
+ await expect(page.locator('.source-card').filter({hasText:'Staged synthetic drone buildings'})).toBeVisible();
+ await page.getByRole('link',{name:'Harmonization',exact:true}).click();
+ await expect(page.getByLabel('Building source')).toHaveValue(source.id);
+ // Deliberate source selection uses the same run endpoint as standard buildings.
+ await page.getByLabel('Building source').selectOption('buildings');
+ await page.getByLabel('Building source').selectOption(source.id);
+ const completed=page.waitForResponse(r=>r.url().endsWith('/api/runs')&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'Run harmonization'}).click();
+ const run=await (await completed).json();
+ expect(run.status).toBe('completed');
+ expect(run.source_ids.buildings).toBe(source.id);
+ await expect(page.getByRole('button',{name:'Run harmonization'})).toBeEnabled();
+ await page.goto('/map');
+ const droneToggle=page.getByRole('checkbox',{name:'AI-derived drone buildings',exact:true});
+ await expect(droneToggle).toBeChecked();
+ await expect(page.locator('path[stroke="#0e948e"]')).toHaveCount(6);
+ await droneToggle.uncheck();
+ await expect(page.locator('path[stroke="#0e948e"]')).toHaveCount(0);
+ await page.getByRole('checkbox',{name:'Buildings',exact:true}).uncheck();
+ await droneToggle.check();
+ await expect(page.locator('path[stroke="#0e948e"]')).toHaveCount(6);
+ await page.locator('.record-list button').filter({hasText:'P0001'}).click();
+ const provenance=page.getByRole('region',{name:'Footprint provenance'});
+ await expect(provenance).toBeVisible();
+ await expect(provenance.getByText('staged-drone-0001',{exact:true})).toBeVisible();
+ await expect(provenance.getByText('Not available',{exact:true})).toHaveCount(6);
+ await expect(page.getByText('Deterministic confidence',{exact:true})).toBeVisible();
+ await expect(page.getByText('Predicted match probability',{exact:true})).toBeVisible();
+ await page.screenshot({path:'../artifacts/phase521-evidence.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ await page.setViewportSize({width:1440,height:1100});
+ await page.goto('/review');
+ await page.locator('.case-row').filter({hasText:'staged-drone-0001'}).click();
+ await expect(page.getByRole('region',{name:'Footprint provenance'})).toBeVisible();
+ await page.getByLabel('Reviewer identifier').fill('drone-test-officer');
+ await page.getByRole('button',{name:'Investigate',exact:true}).click();
+ await expect(page.getByText('Decision persisted to the backend')).toBeVisible();
+ await page.getByRole('button',{name:'Accept',exact:true}).click();
+ await expect(page.locator('.review-detail').getByText('accepted',{exact:true}).first()).toBeVisible();
+ await page.reload();
+ await page.getByRole('button',{name:/resolved/}).click();
+ await page.locator('.case-row').filter({hasText:'staged-drone-0001'}).click();
+ await expect(page.getByRole('region',{name:'Footprint provenance'})).toBeVisible();
+ await page.goto('/audit');
+ await expect(page.getByRole('article').filter({hasText:'drone-test-officer'}).filter({hasText:'ACCEPT'})).toBeVisible();
+ await page.goto('/harmonization');
+ await expect(page.getByLabel('Building source')).toHaveValue(source.id);
+ await page.getByLabel('Building source').selectOption('buildings');
+ const standard=page.waitForResponse(r=>r.url().endsWith('/api/runs')&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'Run harmonization'}).click();
+ expect((await (await standard).json()).source_ids.buildings).toBe('buildings');
+ await expect(page.getByRole('button',{name:'Run harmonization'})).toBeEnabled();
+ await page.goto('/map');
+ await expect(page.getByRole('checkbox',{name:'AI-derived drone buildings',exact:true})).toHaveCount(0);
+ expect(errors).toEqual([]);
+});
+
+
+test('real Lalpur workspace is read-only, geographically correct and separate from benchmark',async({page})=>{
+ const errors:string[]=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.goto('/map');
+ await expect(page.getByRole('button',{name:'Synthetic Benchmark',exact:true})).toHaveAttribute('aria-pressed','true');
+ await page.locator('.record-list button').first().click();
+ await expect(page.getByRole('complementary',{name:'Parcel evidence',exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Real-World Dataset',exact:true}).click();
+ const real=page.getByRole('region',{name:'Real-world workspace',exact:true});
+ await expect(real.getByRole('heading',{name:'Lalpur, Ahmedabad, Gujarat',exact:true})).toBeVisible();
+ await expect(page.locator('.synthetic-chip')).toHaveText('REAL-WORLD REFERENCE');
+ await expect(page.locator('.study-card')).toContainText('Lalpur, Ahmedabad');
+ await expect(page.getByRole('complementary',{name:'Parcel evidence',exact:true})).not.toBeVisible();
+ await expect(real.locator('path[stroke="#1973d2"]')).toHaveCount(24);
+ const processed=real.getByRole('checkbox',{name:'Building footprints \u2014 processed'});
+ const original=real.getByRole('checkbox',{name:'Original source outlines'});
+ await processed.uncheck();
+ await expect(real.locator('path[stroke="#1973d2"]')).toHaveCount(0);
+ await original.check();
+ await expect(real.locator('path[stroke="#bd7626"]')).toHaveCount(24);
+ await processed.check();
+ await original.uncheck();
+ for(const name of ['Cadastral \u2014 unavailable','GNSS \u2014 unavailable','Roads \u2014 not staged']){
+  await expect(real.getByRole('checkbox',{name,exact:true})).toBeDisabled();
+  await expect(real.getByRole('checkbox',{name,exact:true})).not.toBeChecked();
+ }
+ await real.locator('path[stroke="#1973d2"]').first().click();
+ const evidence=real.getByRole('complementary',{name:'Real building provenance'});
+ await expect(evidence).toBeVisible();
+ await expect(evidence.getByText('Real source building annotation',{exact:true})).toBeVisible();
+ await expect(evidence.getByText('EPSG:3857',{exact:true})).toBeVisible();
+ await expect(evidence.getByText('EPSG:32643',{exact:true})).toBeVisible();
+ await expect(evidence.getByText('EPSG:4326',{exact:true})).toBeVisible();
+ await expect(evidence.getByText('Not available',{exact:true})).toHaveCount(4);
+ await expect(real.getByText('Predicted match probability',{exact:true})).toHaveCount(0);
+ await expect(real.getByRole('button',{name:'Run harmonization',exact:true})).toHaveCount(0);
+ await page.screenshot({path:'../artifacts/phase522-lalpur-desktop.png',fullPage:true});
+ await page.setViewportSize({width:390,height:844});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ await page.screenshot({path:'../artifacts/phase522-lalpur-mobile.png',fullPage:true});
+ await page.setViewportSize({width:1440,height:1100});
+ await page.getByRole('button',{name:'Synthetic Benchmark',exact:true}).click();
+ await expect(page.getByRole('complementary',{name:'Parcel evidence',exact:true})).toBeVisible();
+ await expect(page.locator('.synthetic-chip')).toHaveText('SYNTHETIC DEMONSTRATION');
+ await page.getByRole('button',{name:'Real-World Dataset',exact:true}).click();
+ await page.reload();
+ await expect(real.getByRole('heading',{name:'Lalpur, Ahmedabad, Gujarat',exact:true})).toBeVisible();
+ await expect(real.locator('path[stroke="#1973d2"]')).toHaveCount(24);
+ await page.getByRole('button',{name:'Synthetic Benchmark',exact:true}).click();
+ await page.getByRole('link',{name:'Harmonization',exact:true}).click();
+ const completed=page.waitForResponse(r=>r.url().endsWith('/api/runs')&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'Run harmonization',exact:true}).click();
+ const result=await (await completed).json();
+ expect(result.status).toBe('completed');
+ expect(result.source_ids.buildings).toBe('buildings');
+ await expect(page.getByRole('button',{name:'Run harmonization',exact:true})).toBeEnabled();
  expect(errors).toEqual([]);
 });

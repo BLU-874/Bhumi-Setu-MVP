@@ -1,0 +1,18 @@
+[
+  "intersection_over_union",
+  "centroid_distance_m",
+  "boundary_distance_m",
+  "parcel_area_sqm",
+  "building_area_sqm",
+  "area_difference_pct",
+  "survey_number_similarity",
+  "owner_similarity",
+  "attribute_similarity",
+  "survey_exact_normalized_match",
+  "gnss_inside_parcel",
+  "gnss_related_survey_match",
+  "parcel_geometry_valid",
+  "building_geometry_valid",
+  "parcel_geometry_repaired",
+  "building_geometry_repaired"
+]

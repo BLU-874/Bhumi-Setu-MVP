@@ -4,17 +4,31 @@ from functools import lru_cache
 
 from data.generate import generate, LABEL
 from domain.normalization import prepare_feature, reproject, METRIC_CRS, DISPLAY_CRS
+from services.derived_footprints import validate_collection, PROVENANCE_FIELDS
+from services.reference_dataset import SOURCE_ID as REFERENCE_ID, SOURCE_TYPE as REFERENCE_TYPE
 
 NAMES = {'cadastral':'Cadastral / Revenue Parcels',
          'buildings':'Building Footprints / Drone-ORI representation',
          'gnss':'GNSS / Survey Points'}
 
 
-def prepare_source(kind, name, source_crs, collection, source_id=None):
+def prepare_source(kind, name, source_crs, collection, source_id=None, source_type=None, reference_metadata=None):
     if collection.get('type') != 'FeatureCollection' or not isinstance(collection.get('features'),list):
         raise ValueError('Expected a GeoJSON FeatureCollection')
     if not 1 <= len(collection['features']) <= 5000:
         raise ValueError('Foundation supports 1 to 5,000 features per source')
+    reference_marked = [f.get('properties', {}).get('source_type') == REFERENCE_TYPE
+                        for f in collection['features'] if isinstance(f, dict) and isinstance(f.get('properties'), dict)]
+    if any(reference_marked) and reference_metadata is None:
+        raise ValueError('Bundled real-world reference sources are read-only; use the reference source listing')
+    if reference_metadata is not None:
+        if (kind != 'buildings' or source_id != REFERENCE_ID or source_crs != 'EPSG:3857'
+                or len(reference_marked) != len(collection['features']) or not all(reference_marked)
+                or reference_metadata.get('location') != 'Lalpur, Ahmedabad, Gujarat'
+                or any(reference_metadata.get(k) is not False for k in
+                       ('synthetic','benchmark_eligible','cadastral_truth_available','reconciliation_ground_truth_available'))):
+            raise ValueError('Invalid Lalpur reference contract')
+    collection, source_type = validate_collection(kind, collection, source_type)
     features, ids = [], set()
     field = {'cadastral':'parcel_id','buildings':'footprint_id','gnss':'point_id'}[kind]
     for index, f in enumerate(collection['features']):
@@ -45,6 +59,21 @@ def prepare_source(kind, name, source_crs, collection, source_id=None):
             'crs_transformed_features':sum(f['quality']['transformed'] for f in features),
         },
     }
+    if source_type:
+        metadata['source_type'] = source_type
+        metadata['demonstration'] = all(f['properties']['demonstration'] for f in features)
+        metadata['label'] = ('Staged synthetic drone-footprint demonstration; not cadastral truth'
+                             if metadata['demonstration'] else 'AI-derived drone footprints; not cadastral truth')
+        # Per-feature provenance is always retained. Only summarize common values.
+        metadata['provenance'] = {
+            key: features[0]['properties'][key]
+            if all(f['properties'][key] == features[0]['properties'][key] for f in features) else None
+            for key in PROVENANCE_FIELDS
+        }
+    if reference_metadata is not None:
+        metadata.update(reference_metadata)
+        metadata.update(id=source_id, kind=kind, read_only=True,
+                        label='Real-world geospatial reference dataset — staged original vector subset; not cadastral truth')
     return metadata, features
 
 

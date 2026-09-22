@@ -1,0 +1,118 @@
+import {test,expect} from '@playwright/test';
+
+test('continuous landing journey uses actual run, map, review and audit responses',async({page})=>{
+ const errors:string[]=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.goto('/');
+ await page.locator('#how-it-works').scrollIntoViewIfNeeded();
+ await expect(page.locator('.process-story .landing-pipeline li')).toHaveCount(5);
+ await page.locator('#workspace').scrollIntoViewIfNeeded();
+ const workspace=page.locator('.landing-workspace');
+ await expect(workspace.getByRole('button',{name:'Synthetic Benchmark',exact:true})).toHaveAttribute('aria-pressed','true');
+ await workspace.locator('.run-source-picker summary').click();
+ await workspace.getByLabel('Reconciliation building source').selectOption('buildings');
+ await workspace.locator('.run-source-picker summary').click();
+ // Hold the real response to inspect the in-flight state. No fabricated payload.
+ let release!:()=>void;
+ const held=new Promise<void>(resolve=>{release=resolve;});
+ await page.route('**/api/runs',async route=>{if(route.request().method()!=='POST')return route.continue();const response=await route.fetch();await held;await route.fulfill({response});});
+ const completion=page.waitForResponse(r=>r.url().endsWith('/api/runs')&&r.request().method()==='POST');
+ await workspace.getByRole('button',{name:'Run harmonization',exact:true}).click();
+ await expect(workspace.getByRole('button',{name:'Run harmonization',exact:true})).toBeDisabled();
+ await expect(workspace.locator('.run-progress')).toContainText('waiting for the backend');
+ await expect(workspace.locator('.run-results')).toHaveCount(0);
+ release();
+ const response=await completion;expect(response.status()).toBe(201);const run=await response.json();
+ await expect(workspace.locator('.run-results')).toContainText('HARMONIZATION COMPLETE');
+ await expect(workspace.getByRole('complementary',{name:'Parcel preview'})).toHaveCount(0);
+ for(const status of ['matched','needs_review','conflict'])await expect(workspace.locator(`[data-status="${status}"] strong`)).toHaveText(String(run.summary[status]));
+ await expect(workspace.locator('.leaflet-overlay-pane [role="button"]')).toHaveCount(run.summary.total_parcels);
+ await workspace.locator('.leaflet-overlay-pane [role="button"]').first().press('Enter');
+ await expect(workspace.getByRole('complementary',{name:'Parcel preview'})).toBeVisible();
+ await workspace.getByRole('button',{name:'View evidence',exact:true}).click();
+ await expect(workspace.getByRole('complementary',{name:'Parcel evidence'})).toBeVisible();
+ await workspace.screenshot({path:'../artifacts/ui04-results.png'});
+ await workspace.getByRole('link',{name:'Continue to review',exact:true}).click();
+ await expect(page).toHaveURL(/#human-review$/);
+ const review=page.locator('#human-review .review-experience');
+ await expect(review.locator('.review-map .leaflet-container')).toBeVisible();
+ // Select geometry, rather than using the case list.
+ await review.locator('.review-map [role="button"]').first().press('Enter');
+ await expect(review.locator('.review-detail h2')).not.toHaveText('Select a case');
+ for(const title of ['Cadastral evidence','Drone / building evidence','GNSS evidence','ML evidence','Deterministic evidence','Validation','Recommendation'])await expect(review.getByRole('heading',{name:title,exact:true})).toBeVisible();
+ const selectedRecord=await review.locator('.review-detail h2').innerText();
+ const actualResults=await page.request.get(`${process.env.PLAYWRIGHT_API_URL||'http://127.0.0.1:8015'}/api/results?run_id=${run.id}`);
+ const actualRecord=(await actualResults.json()).features.find((f:{properties:{parcel_id:string}})=>f.properties.parcel_id===selectedRecord);
+ await expect(review.locator('.review-evidence-story').getByText(String(actualRecord.properties.cadastral.area_sqm),{exact:true})).toBeVisible();
+ await review.getByRole('button',{name:'Reject',exact:true}).click();
+ await expect(review.getByRole('alert')).toContainText('Enter a reviewer identifier');
+ await review.getByLabel('Reviewer identifier').fill('ui04-officer');
+ await review.getByLabel('Note or reason').fill('UI-04 browser journey: inspect boundary evidence.');
+ const decision=page.waitForResponse(r=>r.url().includes('/api/review-cases/')&&r.request().method()==='PATCH');
+ await review.getByRole('button',{name:'Reject',exact:true}).click();
+ const saved=await decision;expect(saved.status()).toBe(200);const item=await saved.json();
+ expect(saved.request().postDataJSON().expected_version).toBe(item.version-1);
+ await expect(review.locator('.decision-confirmation')).toContainText('Decision recorded');
+ await expect(review.locator('.decision-receipt')).toContainText('ui04-officer');
+ await expect(review.locator('.decision-receipt')).toContainText('resolved');
+ await review.getByRole('link',{name:'View audit trail',exact:true}).click();
+ const audit=page.locator('#audit-trail');
+ await expect(audit.getByRole('article').filter({hasText:'ui04-officer'}).filter({hasText:item.record_id})).toBeVisible();
+ await audit.screenshot({path:'../artifacts/ui04-audit.png'});
+ await page.reload();
+ await page.locator('#human-review').scrollIntoViewIfNeeded();
+ await review.getByRole('button',{name:/resolved/}).click();
+ await review.locator('.case-row').filter({hasText:item.record_id}).click();
+ await expect(review.locator('.persisted-note')).toContainText('ui04-officer');
+ await review.screenshot({path:'../artifacts/ui04-review.png'});
+ expect(errors).toEqual([]);
+});
+
+test('stale review version cannot overwrite another reviewer and refresh recovers',async({page,request})=>{
+ await page.goto('/review');
+ const review=page.locator('.review-experience');
+ await review.locator('.case-row').first().click();
+ const record=await review.locator('.review-detail h2').innerText();
+ const apiBase=process.env.PLAYWRIGHT_API_URL||'http://127.0.0.1:8015';
+ const cases=await (await request.get(`${apiBase}/api/review-cases`)).json();
+ const item=cases.cases.find((c:{record_id:string})=>c.record_id===record);
+ expect((await request.patch(`${apiBase}/api/review-cases/${item.id}`,{data:{decision:'investigate',reviewer:'other-officer',expected_version:item.version}})).status()).toBe(200);
+ await review.getByLabel('Reviewer identifier').fill('stale-officer');
+ const rejected=page.waitForResponse(r=>r.request().method()==='PATCH');
+ await review.getByRole('button',{name:'Accept',exact:true}).click();
+ expect((await rejected).status()).toBe(409);
+ await expect(review.getByRole('alert')).toBeVisible();
+ await expect(review.locator('.decision-confirmation')).toHaveCount(0);
+ await review.getByRole('button',{name:'Refresh review queue',exact:true}).click();
+ await expect(review.locator('.persisted-note')).toContainText('other-officer');
+ const saved=page.waitForResponse(r=>r.request().method()==='PATCH');
+ await review.getByRole('button',{name:'Accept',exact:true}).click();
+ expect((await saved).status()).toBe(200);
+ await expect(review.locator('.decision-confirmation')).toContainText('Decision recorded');
+});
+
+test('failed run, reference boundary and responsive review remain honest',async({page})=>{
+ await page.goto('/');
+ await page.locator('#workspace').scrollIntoViewIfNeeded();
+ const workspace=page.locator('.landing-workspace');
+ await page.route('**/api/runs',route=>route.request().method()==='POST'?route.fulfill({status:503,contentType:'application/json',body:'{"detail":"Harmonization temporarily unavailable"}'}):route.continue());
+ await workspace.getByRole('button',{name:'Run harmonization',exact:true}).click();
+ await expect(workspace.getByRole('alert')).toContainText('Completion is not confirmed');
+ await expect(workspace.locator('.run-results')).not.toContainText('HARMONIZATION COMPLETE');
+ await workspace.getByRole('button',{name:'Real-World Dataset',exact:true}).click();
+ await expect(workspace.getByRole('button',{name:'Run harmonization',exact:true})).not.toBeVisible();
+ await expect(workspace.getByRole('region',{name:'Real-world workspace'})).toContainText('not a cadastral reconciliation benchmark');
+ await expect(page.locator('#human-review .reference-review-boundary')).toBeVisible();
+ await expect(page.locator('#human-review .review-experience')).toHaveCount(0);
+ await workspace.getByRole('button',{name:'Synthetic Benchmark',exact:true}).click();
+ for(const viewport of [{width:1440,height:1000},{width:768,height:1024},{width:390,height:844}]){
+  await page.setViewportSize(viewport);
+  await page.locator('#human-review').scrollIntoViewIfNeeded();
+  await page.locator('#human-review .case-row').first().click();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+  await page.locator('#human-review .review-experience').screenshot({path:`../artifacts/ui04-review-${viewport.width}.png`});
+ }
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await expect(page.locator('.process-story .landing-pipeline li.complete')).toHaveCount(5);
+});

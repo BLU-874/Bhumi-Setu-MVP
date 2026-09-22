@@ -1,0 +1,272 @@
+{
+  "type": "FeatureCollection",
+  "name": "Staged synthetic drone buildings",
+  "description": "Synthetic contract demonstration only. No imagery or model was used. Not cadastral truth.",
+  "source_crs": "EPSG:3857",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8221709.74084486,
+              2098556.08295476
+            ],
+            [
+              8221709.393939472,
+              2098572.7801512093
+            ],
+            [
+              8221693.849792102,
+              2098572.4015674605
+            ],
+            [
+              8221694.1967103025,
+              2098555.704372325
+            ],
+            [
+              8221709.74084486,
+              2098556.08295476
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0001",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 232.12,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8221782.753769993,
+              2098557.7296404187
+            ],
+            [
+              8221782.716503693,
+              2098579.072534679
+            ],
+            [
+              8221763.176258099,
+              2098579.0584180164
+            ],
+            [
+              8221763.2135450505,
+              2098557.715524986
+            ],
+            [
+              8221782.753769993,
+              2098557.7296404187
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0002",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 372.8,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8221851.808762704,
+              2098557.8968203785
+            ],
+            [
+              8221851.470181031,
+              2098576.966763336
+            ],
+            [
+              8221831.055858574,
+              2098576.546135409
+            ],
+            [
+              8221831.394459477,
+              2098557.476194289
+            ],
+            [
+              8221851.808762704,
+              2098557.8968203785
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0003",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 348.12,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8221915.286856862,
+              2098555.9242436974
+            ],
+            [
+              8221915.005266257,
+              2098578.8105491744
+            ],
+            [
+              8221896.759497225,
+              2098578.5581067153
+            ],
+            [
+              8221897.041108474,
+              2098555.671802958
+            ],
+            [
+              8221915.286856862,
+              2098555.9242436974
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0004",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 373.33,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8221982.580418078,
+              2098557.9568736115
+            ],
+            [
+              8221982.368954245,
+              2098576.521602984
+            ],
+            [
+              8221964.457931788,
+              2098576.2940932717
+            ],
+            [
+              8221964.669412062,
+              2098557.729365234
+            ],
+            [
+              8221982.580418078,
+              2098557.9568736115
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0005",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 297.28,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              8222074.426897521,
+              2098558.5782945417
+            ],
+            [
+              8222074.126938237,
+              2098579.970191864
+            ],
+            [
+              8222051.32860684,
+              2098579.606068958
+            ],
+            [
+              8222051.628590229,
+              2098558.214173736
+            ],
+            [
+              8222074.426897521,
+              2098558.5782945417
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "footprint_id": "staged-drone-0006",
+        "source_type": "ai_derived_drone_footprint",
+        "source": "drone_orthophoto",
+        "area_sqm": 436.05,
+        "model_name": null,
+        "model_version": null,
+        "model_artifact_sha256": null,
+        "inference_run_id": null,
+        "derived_from": null,
+        "segmentation_probability": null,
+        "confidence_method": "not_available",
+        "demonstration": true
+      }
+    }
+  ]
+}

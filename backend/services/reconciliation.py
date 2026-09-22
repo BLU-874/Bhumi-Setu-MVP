@@ -10,6 +10,7 @@ from rapidfuzz import fuzz
 
 from domain.matching import harmonize, normalize_attributes
 from domain.normalization import reproject, METRIC_CRS, DISPLAY_CRS
+from ml.predict import Ranker
 
 
 def now():
@@ -67,6 +68,8 @@ def execute(store, selection=None):
         # Pass original normalized geometries to preserve engine repair flags.
         def original(f):
             return {'type':'Feature','geometry':f['normalized_original_geometry'],'properties':f['properties']}
+        prepared_candidates = candidates
+        ranker = Ranker()
         candidates = {key:[original(f) for f in val] for key,val in candidates.items()}
         result = harmonize({'features':[original(f) for f in layers['cadastral']]},
                            gnss_fc={'features':[original(f) for f in layers['gnss']]},building_candidates=candidates)
@@ -78,6 +81,8 @@ def execute(store, selection=None):
             p['geometry_quality'] = by_id[p['parcel_id']]['quality']
             p['review_required'] = p['status'] != 'matched' or bool(p['validation_flags'])
             p['decision_status'] = 'pending_review' if p['review_required'] else 'proposed_match'
+            p['deterministic_confidence'] = p['confidence']
+            p.update(ranker.rank(by_id[p['parcel_id']], prepared_candidates.get(p['parcel_id'],[]), layers['gnss']))
         flags = Counter(flag for f in result['features'] for flag in f['properties']['validation_flags'])
         result['summary']['review_required'] = sum(f['properties']['review_required'] for f in result['features'])
         run['stages'] += [{'name':name,'status':'completed'} for name in

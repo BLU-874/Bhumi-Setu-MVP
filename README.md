@@ -5,9 +5,9 @@
 SIH26013 — Automated Integration & Intelligent Harmonization of Multi-source
 Geospatial Data for Urban Land Record Management.
 
-Phase 4 foundation. All included geography, ownership records and survey
+Phase 5.1 supervised match ranking. All included geography, ownership records and survey
 observations are a **Synthetic demonstration dataset**, generated near Pune.
-There is no trained ML, imagery inference or official land record in this demo.
+A supervised candidate-match classifier is trained on synthetic pairs. There is no imagery inference or official land record in this demo.
 
 ## Start locally (PowerShell)
 
@@ -96,7 +96,7 @@ The scoring engine was adapted from `D:\Bhumi-Setu\backend\matching.py` without
 changing its 65% IoU / 35% attribute weighting, rounding, thresholds or eight-point
 GNSS containment boost. Field aliases, owner and survey RapidFuzz ratios, area
 similarity, duplicate checks, validation flags and contribution breakdowns remain.
-The implementation is **rule/evidence based**, not trained AI/ML.
+The preserved confidence engine is **rule/evidence based**. A separate supervised ML model now ranks its generated candidates; it does not change the rules or decisions.
 
 Concrete adaptations:
 
@@ -189,11 +189,49 @@ Each accepted, rejected or investigating decision appends an audit event in the
 same transaction. No browser state or localStorage is treated as persistence.
 
 Deferred: authentication, enterprise permissions, municipal/utility federation,
-distributed jobs, advanced change detection, drone/ORI processing and ML.
+distributed jobs, advanced change detection, drone/ORI processing and production ML deployment.
 Future ML roadmap: reviewed decisions → labelled historical cases → ML-assisted
 candidate ranking. Future imagery roadmap: imagery → computer-vision extraction
 → spatial evidence → reconciliation. Neither is implemented here.
 
 Operational limits: single backend worker, synchronous small-data processing,
-no production auth, no record editing, no decisions or legally authoritative
-output. SQLite and PostGIS data stores are separate; no automatic transfer.
+no production auth, no record editing or legally authoritative output. SQLite and PostGIS data stores are separate; no automatic transfer.
+
+
+## Phase 5.1 supervised candidate match ranking
+
+The real HistGradientBoostingClassifier and LogisticRegression baseline are
+trained/evaluated on synthetic pair labels, not deterministic predictions.
+See [PHASE5_REPORT.md](PHASE5_REPORT.md) for measured metrics and limitations,
+and [feature definitions](backend/ml/README.md) for the model contract.
+
+From `backend`, generate, train and evaluate in order:
+
+```powershell
+.venv\Scripts\python -m ml.build_dataset
+.venv\Scripts\python -m ml.train
+.venv\Scripts\python -m ml.evaluate
+$env:ML_ENABLED='true'
+.venv\Scripts\python -m uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+Install the updated backend requirements first when using a fresh environment.
+ML is enabled by default when the trusted artifact is available; set
+`ML_ENABLED=false` in `backend/.env` or the process environment to disable it.
+No database connection is needed for training. Artifacts are under
+`backend/ml/artifacts`; the larger reproducible dataset is ignored by Git.
+
+Start a **new harmonization run**, then select a record in WebGIS. The evidence
+panel displays deterministic confidence, the separately ML-ranked candidate,
+predicted match probability, rank, model version and expandable input evidence.
+The existing selected candidate, thresholds, review actions and audit behavior
+remain unchanged. Results are persisted with their ML evidence through the
+existing `/api/results` API; historical runs are not rescored automatically.
+
+A missing, corrupt or incompatible model falls back to deterministic operation
+with `model_available=false`. Serialized models are trusted local artifacts,
+never uploaded user input. The sklearn runtime is pinned for compatibility.
+
+**Synthetic training benchmark ? not a production accuracy estimate.** The
+probabilities are uncalibrated estimates under the synthetic sampling protocol.
+They do not establish ownership, legal certainty or real-world match accuracy.

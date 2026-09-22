@@ -1,0 +1,115 @@
+{
+  "model_type": "HistGradientBoostingClassifier",
+  "model_version": "synthetic-hgb-v1-6d8638ed6839",
+  "training_dataset_label": "Synthetic training benchmark \u2014 not a production accuracy estimate.",
+  "dataset_generation_version": "synthetic-pairs-v1",
+  "dataset_sha256": "6d8638ed68398e083c6de5877495d736adac0238421a7f254a836434add1d0bf",
+  "feature_names": [
+    "intersection_over_union",
+    "centroid_distance_m",
+    "boundary_distance_m",
+    "parcel_area_sqm",
+    "building_area_sqm",
+    "area_difference_pct",
+    "survey_number_similarity",
+    "owner_similarity",
+    "attribute_similarity",
+    "survey_exact_normalized_match",
+    "gnss_inside_parcel",
+    "gnss_related_survey_match",
+    "parcel_geometry_valid",
+    "building_geometry_valid",
+    "parcel_geometry_repaired",
+    "building_geometry_repaired"
+  ],
+  "training_timestamp": "2026-09-17T12:21:44.259918+00:00",
+  "random_seed": 26013,
+  "sklearn_version": "1.9.1",
+  "split_strategy": "Geographic wards 1-3 train / 4 validation / 5 test; both pair members partitioned",
+  "counts": {
+    "train": 2049,
+    "validation": 677,
+    "test": 676
+  },
+  "validation_metrics": {
+    "baseline": {
+      "precision": 0.9895833333333334,
+      "recall": 1.0,
+      "f1": 0.9947643979057592,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          581,
+          1
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 582,
+      "threshold": 0.5
+    },
+    "match_ranker": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          582,
+          0
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 582,
+      "threshold": 0.5
+    }
+  },
+  "selection": "Predeclared HGB first model; baseline comparison; fixed threshold 0.5; no tuning",
+  "test_metrics": {
+    "logistic_regression": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          581,
+          0
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 581,
+      "threshold": 0.5
+    },
+    "hist_gradient_boosting": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          581,
+          0
+        ],
+        [
+          0,
+          95
+        ]
+      ],
+      "positive_examples": 95,
+      "negative_examples": 581,
+      "threshold": 0.5
+    }
+  }
+}

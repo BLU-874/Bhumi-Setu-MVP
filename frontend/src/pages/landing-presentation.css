@@ -1,0 +1,36 @@
+/* Continuous editorial presentation; all workspace controls use existing data. */
+.cinematic-landing{--landing-bg:#101110;--landing-text:#edeee7}
+.cinematic-landing .landing-section{background:#101110;color:#edeee7}
+.cinematic-landing .landing-section h2{color:#edeee7}
+.cinematic-landing .landing-section h2 span{color:#aab69c}
+.cinematic-landing .landing-eyebrow{color:#a3ad96}
+.cinematic-landing .landing-text-button{color:#d6dccd}
+.cinematic-landing .wide-section-heading>p,.cinematic-landing .section-intro>p:not(.landing-eyebrow){color:#aeb5a5}
+.cinematic-landing .landing-pipeline{grid-template-columns:repeat(5,minmax(0,1fr));gap:25px}
+.cinematic-landing .landing-pipeline li{border-color:#4e5546;padding-right:0}
+.cinematic-landing .landing-pipeline h3{font-size:12px;letter-spacing:1.5px;color:#e6e9dc}
+.cinematic-landing .landing-pipeline p{max-width:220px;color:#aeb5a5;font-size:12px}
+.cinematic-landing .pipeline-number{color:#9daa8c}
+.cinematic-landing .pipeline-note{border-color:#343c2d;color:#b6c0a9}
+.cinematic-landing .workspace-section{max-width:1680px;width:94%;padding-top:45px}
+.cinematic-landing .workspace-context{color:#d9dece;border-color:#3c4434}
+.cinematic-landing .workspace-context span{color:#a6ae9b}
+.cinematic-landing .landing-workspace{background:#191e19;border-color:#3c4439;border-radius:3px;box-shadow:none}
+.cinematic-landing .workspace-chrome{background:#1d241d;border-color:#3d4638;color:#dae1d1}
+.cinematic-landing .landing-workspace .map-toolbar{background:#20271f;border-color:#3c4737;color:#d0d9c7}
+.cinematic-landing .landing-workspace .map-panel{grid-template-columns:145px minmax(0,1fr)}
+.cinematic-landing .landing-workspace .workspace-map{height:600px}
+.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:minmax(0,1fr) 265px}
+.cinematic-landing .landing-workspace :is(.map-panel,.panel,.source-card,.evidence){background:#1d241d;border-color:#3a4536;color:#d2dccb}
+.cinematic-landing .landing-workspace .evidence{max-height:670px}
+.cinematic-landing .landing-workspace .map-bottom{color:#bac6ad;border-color:#3c4737}
+.cinematic-landing .landing-workspace .leaflet-container{background:#353c31;background-image:none}
+.cinematic-landing .landing-workspace .leaflet-control-attribution{background:#111b12e8;color:#d9e2d2;font-size:9px}
+.cinematic-landing .landing-workspace .leaflet-control-attribution a{color:#d9e2d2}
+.cinematic-landing .landing-evidence-card{background:#1b221b;border-color:#414b39;box-shadow:none}
+.cinematic-landing .provenance-section{background:#171c16;border-color:#313b2c}
+.cinematic-landing .final-cta{background:#101110}
+.cinematic-landing .landing-footer{color:#c9d0c0;border-color:#343d2d}
+@media(max-width:1180px){.cinematic-landing .landing-workspace .map-panel{grid-template-columns:125px minmax(0,1fr)}.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:minmax(0,1fr) 235px}}
+@media(max-width:950px){.cinematic-landing .landing-pipeline{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:35px}.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:1fr}.cinematic-landing .landing-workspace .workspace-map{height:520px}}
+@media(max-width:600px){.cinematic-landing .landing-pipeline{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 20px}.cinematic-landing .workspace-section{width:94%}.cinematic-landing .landing-workspace .map-panel{display:block}.cinematic-landing .landing-workspace .workspace-map{height:410px}.cinematic-landing .landing-workspace .map-toolbar label{width:auto}.cinematic-landing .landing-workspace .map-caption{font-size:7px}}
