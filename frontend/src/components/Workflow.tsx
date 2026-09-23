@@ -1,5 +1,56 @@
 import { Check, ChevronRight } from 'lucide-react';
-const steps=['Data ingestion','CRS normalization','Schema normalization','Geometry validation','Spatial matching','Attribute matching','Confidence scoring','Conflict detection','Human review','Harmonized record'];
-export default function Workflow({completed=false,running=false}:{completed?:boolean;running?:boolean}){
- return <section className="workflow" aria-label="Reconciliation workflow"><div className="section-top"><div><span className="eyebrow">FROM FRAGMENTED TO CONNECTED</span><h2>One clear path to reconciliation</h2></div><span className="muted">Rule / evidence-based</span></div><ol>{steps.map((s,i)=><li key={s} className={`${completed&&i<8?'done':''} ${i>=8?'future':''}`}><span className="step-number">{completed&&i<8?<Check size={13}/>:String(i+1).padStart(2,'0')}</span><span>{s}<small>{i>=8?'Human oversight':completed?'Processed':running?'Processing run':'Ready'}</small></span>{i<9&&<ChevronRight className="step-arrow" size={14}/>}</li>)}</ol><p className="workflow-note">{running?'Processing the real dataset. Results appear when the backend finishes.':completed?'Comparison complete. Inspect result evidence, record a human decision in the review map, and follow the audit trail.':'Source normalization and geometry validation run on import. Matching and scoring run when you start harmonization.'}</p></section>
+const steps = [
+  'Data ingestion',
+  'CRS normalization',
+  'Schema normalization',
+  'Geometry validation',
+  'Spatial matching',
+  'Attribute matching',
+  'Confidence scoring',
+  'Conflict detection',
+  'Human review',
+  'Harmonized record',
+];
+
+export default function Workflow({
+  completed = false,
+  running = false,
+}: {
+  completed?: boolean;
+  running?: boolean;
+}) {
+  return (
+    <section className="workflow" aria-label="Reconciliation workflow">
+      <div className="section-top">
+        <div>
+          <span className="eyebrow">FROM FRAGMENTED TO CONNECTED</span>
+          <h2>One clear path to reconciliation</h2>
+        </div>
+        <span className="muted">Deterministic evidence scoring + ML candidate ranking</span>
+      </div>
+      <ol>
+        {steps.map((s, i) => (
+          <li key={s} className={`${completed && i < 8 ? 'done' : ''} ${i >= 8 ? 'future' : ''}`}>
+            <span className="step-number">
+              {completed && i < 8 ? <Check size={13} /> : String(i + 1).padStart(2, '0')}
+            </span>
+            <span>
+              {s}
+              <small>
+                {i >= 8 ? 'Human oversight' : completed ? 'Processed' : running ? 'Processing run' : 'Ready'}
+              </small>
+            </span>
+            {i < 9 && <ChevronRight className="step-arrow" size={14} />}
+          </li>
+        ))}
+      </ol>
+      <p className="workflow-note">
+        {running
+          ? 'Processing the real dataset. Results appear when the backend finishes.'
+          : completed
+          ? 'Comparison complete. Inspect result evidence, record a human decision in the review map, and follow the audit trail.'
+          : 'Source normalization and geometry validation run on import. Matching and scoring run when you start harmonization.'}
+      </p>
+    </section>
+  );
 }

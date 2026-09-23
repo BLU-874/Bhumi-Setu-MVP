@@ -15,4 +15,6 @@ artifacts/
 backend/ml/artifacts/dataset.json
 frontend/test-results/
 frontend/playwright-report/
+test-results/
+backend/tmp_pytest/
 *.tsbuildinfo

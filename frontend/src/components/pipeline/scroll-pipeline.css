@@ -1,14 +1,35 @@
 /* ==========================================================================
    Bhumi-Setu — Scroll-Driven Pipeline Presentation
-   Editorial Geospatial Styling: Charcoal, Near-black, Warm Typography, Semantic Accents
+   Government of India Institutional Visual System
+   Palette: Deep Teal navigation, White/Pale Teal surfaces, restrained accents
    ========================================================================== */
+
+/*
+  DESIGN TOKENS
+  --gov-teal:        #007C83   Primary institutional teal
+  --gov-deep:        #005F63   Deep teal (nav, headers)
+  --gov-dark:        #004F52   Darkest teal accent
+  --page-bg:         #F5F7F7   Page background
+  --pale-teal:       #EEF7F6   Pale teal section background
+  --pale-neutral:    #F3F6F8   Pale neutral surface
+  --text-primary:    #172121   Main body text
+  --text-secondary:  #4F5C5C   Secondary text
+  --text-muted:      #718080   Muted / captions
+  --border:          #D5E1DF   Standard border
+  --matched:         #16845B   Green status
+  --review:          #C48616   Amber status
+  --conflict:        #C44747   Red status
+  --cadastral:       #A47C52   Cadastral/survey layer
+  --gnss:            #174A4D   GNSS layer
+  --geo-secondary:   #6C7A7A   Secondary geometry
+*/
 
 .pipeline-section {
   position: relative;
-  background: #0d1210;
-  color: #ebefe6;
-  border-top: 1px solid #1e2b24;
-  border-bottom: 1px solid #1e2b24;
+  background: #F5F7F7;
+  color: #172121;
+  border-top: 1px solid #D5E1DF;
+  border-bottom: 1px solid #D5E1DF;
   overflow: clip;
 }
 
@@ -19,67 +40,70 @@
   position: relative;
 }
 
-/* Subtle 01 — 09 Progress Bar */
+/* ==========================================================================
+   01–09 Institutional Navigation Bar
+   ========================================================================== */
 .pipeline-progress-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: rgba(13, 18, 16, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #1f2c25;
-  padding: 14px 0;
-  margin-bottom: 24px;
+  background: #005F63;
+  border-bottom: 1px solid #004F52;
+  padding: 0;
 }
 
 .pipeline-progress-track {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
-  gap: 8px;
+  gap: 0;
   max-width: 1600px;
   margin: 0 auto;
+  padding: 0 48px;
 }
 
 .pipeline-step-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: transparent;
-  border: 1px solid transparent;
-  color: #728479;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: rgba(255, 255, 255, 0.65);
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 14px 12px 11px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
   white-space: nowrap;
+  letter-spacing: 0.3px;
 }
 
 .pipeline-step-pill:hover {
-  color: #c4d1c8;
-  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .pipeline-step-pill.is-active {
-  color: #ecf3ee;
-  background: #17241e;
-  border-color: #314a3d;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom-color: #ffffff;
 }
 
 .pipeline-step-pill .step-num {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
-  color: #63d1df;
+  color: rgba(255, 255, 255, 0.45);
   font-weight: 600;
 }
 
 .pipeline-step-pill.is-active .step-num {
-  color: #8ce4a7;
+  color: rgba(255, 255, 255, 0.75);
 }
 
-/* Two-column layout */
+/* ==========================================================================
+   Two-column layout
+   ========================================================================== */
 .pipeline-grid {
   display: grid;
   grid-template-columns: 42% 58%;
@@ -102,7 +126,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 64px 0;
-  border-bottom: 1px dashed rgba(45, 64, 54, 0.4);
+  border-bottom: 1px solid #D5E1DF;
   transition: opacity 0.3s ease;
 }
 
@@ -111,6 +135,7 @@
   min-height: 90vh;
 }
 
+/* Stage eyebrow */
 .stage-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -118,7 +143,7 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
   letter-spacing: 2px;
-  color: #62cfdf !important;
+  color: #007C83 !important;
   font-weight: 600;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -128,28 +153,29 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #62cfdf;
-  box-shadow: 0 0 8px rgba(98, 207, 223, 0.6);
+  background: #007C83;
+  /* No glow */
 }
 
+/* Stage headings */
 .pipeline-stage-item h2 {
   font-family: Manrope, sans-serif;
-  font-size: clamp(32px, 3.2vw, 48px);
+  font-size: clamp(28px, 2.8vw, 42px);
   font-weight: 700;
-  line-height: 1.16;
-  letter-spacing: -1.2px;
-  color: #f1f4ed;
+  line-height: 1.2;
+  letter-spacing: -0.8px;
+  color: #172121;
   margin: 0 0 16px;
 }
 
 .pipeline-stage-item h2 .highlight {
-  color: #8ee2ac;
+  color: #005F63;
 }
 
 .pipeline-stage-item h2 .sub-headline {
   display: block;
-  font-size: clamp(24px, 2.4vw, 36px);
-  color: #a7b7ac;
+  font-size: clamp(20px, 2vw, 30px);
+  color: #4F5C5C;
   font-weight: 500;
   margin-top: 6px;
 }
@@ -158,11 +184,12 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 15px;
   line-height: 1.8;
-  color: #9cb0a3;
+  color: #4F5C5C;
   max-width: 520px;
   margin: 0 0 24px;
 }
 
+/* Tags */
 .stage-tags {
   display: flex;
   flex-wrap: wrap;
@@ -174,10 +201,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #141f1a;
-  border: 1px solid #263c31;
-  color: #b5c7bc;
-  font-family: monospace;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  color: #4F5C5C;
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
   letter-spacing: 0.5px;
   padding: 4px 10px;
@@ -185,14 +212,18 @@
 }
 
 .stage-tag.accent {
-  background: #102621;
-  border-color: #386958;
-  color: #8be3bc;
+  background: #EEF7F6;
+  border-color: #007C83;
+  color: #005F63;
+  font-weight: 600;
 }
 
+/* Evidence strip */
 .stage-evidence-strip {
-  background: #121a16;
-  border-left: 2px solid #58ba9c;
+  background: #FFFFFF;
+  border-left: 3px solid #007C83;
+  border: 1px solid #D5E1DF;
+  border-left: 3px solid #007C83;
   padding: 14px 18px;
   margin-top: 8px;
   border-radius: 0 4px 4px 0;
@@ -201,29 +232,91 @@
 
 .stage-evidence-strip span {
   display: block;
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
-  letter-spacing: 1px;
-  color: #7da592;
+  letter-spacing: 1.5px;
+  color: #007C83;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .stage-evidence-strip strong {
   display: block;
   font-size: 13px;
   font-weight: 600;
-  color: #e0eae2;
+  color: #172121;
   margin-top: 3px;
 }
 
 .stage-evidence-strip p {
   font-size: 12px;
-  color: #8ea496;
+  color: #718080;
   margin: 4px 0 0;
   line-height: 1.5;
 }
 
-/* Right sticky viewport column */
+/* Stage CTA Button */
+.stage-cta-wrap {
+  margin-top: 18px;
+}
+
+.stage-action-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #007C83;
+  color: #FFFFFF !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+  width: fit-content;
+}
+
+.stage-action-cta:hover {
+  background: #0F2F32;
+  transform: translateX(2px);
+}
+
+.stage-action-cta:focus-visible {
+  outline: 2px solid #007C83;
+  outline-offset: 2px;
+}
+
+/* Visual Stage Review Footer Action */
+.v-review-footer-action {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #D5E1DF;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.v-open-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #007C83;
+  color: #FFFFFF !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.v-open-review-btn:hover {
+  background: #0F2F32;
+}
+
+/* ==========================================================================
+   Right sticky viewport column
+   ========================================================================== */
 .pipeline-visual-column {
   position: sticky;
   top: 90px;
@@ -236,31 +329,34 @@
   z-index: 20;
 }
 
+/* ==========================================================================
+   Visual Canvas — Institutional Application Container
+   ========================================================================== */
 .pipeline-visual-canvas {
   position: relative;
   width: 100%;
   height: 100%;
-  background: #111714;
-  border: 1px solid #25362c;
-  border-radius: 6px;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  border-radius: 4px;
   overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 12px rgba(0, 95, 99, 0.06);
   display: flex;
   flex-direction: column;
 }
 
-/* Chrome header on visual */
+/* Chrome header on visual — application bar style */
 .visual-chrome {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  background: #151f1a;
-  border-bottom: 1px solid #23352b;
-  font-family: monospace;
+  background: #EEF7F6;
+  border-bottom: 1px solid #D5E1DF;
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
-  color: #8da496;
-  letter-spacing: 0.5px;
+  color: #4F5C5C;
+  letter-spacing: 0.4px;
   flex-shrink: 0;
 }
 
@@ -271,15 +367,17 @@
 }
 
 .visual-chrome-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #52c48d;
+  background: #007C83;
 }
 
 .visual-chrome-mode {
-  color: #61cfde;
+  color: #005F63;
   font-weight: 600;
+  letter-spacing: 0.8px;
+  font-size: 10px;
 }
 
 .visual-viewport-body {
@@ -288,10 +386,12 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #0f1512;
+  background: #FFFFFF;
 }
 
-/* Individual Stage Visual Container */
+/* ==========================================================================
+   Individual Stage Visual Container
+   ========================================================================== */
 .visual-stage-container {
   position: absolute;
   inset: 0;
@@ -299,21 +399,23 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
   overflow: auto;
 }
 
-/* Visual 01: Sources Convergence */
+/* ==========================================================================
+   Visual 01: Sources — Institutional Source Cards
+   ========================================================================== */
 .v-sources-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   height: 100%;
 }
 
 .v-source-card {
-  background: #141c18;
-  border: 1px solid #26382e;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -324,7 +426,7 @@
 .v-source-card-image {
   height: 62%;
   position: relative;
-  background: #0c120f;
+  background: #F3F6F8;
   overflow: hidden;
 }
 
@@ -340,48 +442,54 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-top: 1px solid #D5E1DF;
 }
 
 .v-source-card-meta span {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   font-weight: 700;
+  text-transform: uppercase;
 }
 
-.v-source-card-meta span.cadastral { color: #d4b465; }
-.v-source-card-meta span.drone { color: #62cfdf; }
-.v-source-card-meta span.gnss { color: #72e4b3; }
+.v-source-card-meta span.cadastral { color: #A47C52; }
+.v-source-card-meta span.drone     { color: #007C83; }
+.v-source-card-meta span.gnss      { color: #174A4D; }
 
 .v-source-card-meta h4 {
-  margin: 4px 0 2px;
+  margin: 5px 0 3px;
   font-size: 13px;
-  color: #e4ebe5;
+  color: #172121;
   font-family: Manrope, sans-serif;
+  font-weight: 600;
 }
 
 .v-source-card-meta p {
   font-size: 10px;
-  color: #8da496;
+  color: #718080;
   line-height: 1.4;
   margin: 0;
 }
 
-/* Visual 02: Normalize / Reprojection */
+/* ==========================================================================
+   Visual 02: Normalize — Clean GIS Coordinate Canvas
+   ========================================================================== */
 .v-normalize-box {
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 14px;
+  gap: 12px;
 }
 
 .v-grid-canvas {
   flex: 1;
-  background: 
-    linear-gradient(to right, rgba(45, 68, 56, 0.25) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(45, 68, 56, 0.25) 1px, transparent 1px);
+  background:
+    linear-gradient(to right, rgba(213, 225, 223, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(213, 225, 223, 0.6) 1px, transparent 1px);
   background-size: 28px 28px;
-  border: 1px solid #273b30;
+  background-color: #F5F7F7;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -391,19 +499,19 @@
   position: absolute;
   font-family: monospace;
   font-size: 8px;
-  color: #5c7567;
+  color: #718080;
 }
 
 .v-normalize-pipelines {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .v-norm-pill {
-  background: #141c18;
-  border: 1px solid #273a30;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
   padding: 10px;
   border-radius: 4px;
   font-size: 11px;
@@ -411,132 +519,150 @@
 
 .v-norm-pill b {
   display: block;
-  color: #63d0df;
-  font-family: monospace;
-  font-size: 10px;
-  margin-bottom: 2px;
+  color: #007C83;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 3px;
 }
 
 .v-norm-pill small {
-  color: #93a89b;
+  color: #4F5C5C;
   font-size: 10px;
   line-height: 1.4;
 }
 
-/* Visual 03: Spatial Reconciliation */
+/* ==========================================================================
+   Visual 03: Spatial Reconciliation — Real GIS Software Look
+   ========================================================================== */
 .v-reconcile-scene {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .v-spatial-overlay {
   flex: 1;
-  border: 1px solid #2c4236;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   position: relative;
-  background: radial-gradient(circle at 50% 50%, #15221b, #0d1410 80%);
+  background: #F5F7F7;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .v-reconcile-metric-bar {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .v-metric-item {
-  background: #141c18;
-  border: 1px solid #273b30;
-  padding: 10px;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  padding: 10px 12px;
   border-radius: 4px;
 }
 
 .v-metric-item small {
   display: block;
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
-  color: #7c9888;
+  color: #718080;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 .v-metric-item strong {
   display: block;
-  font-size: 16px;
-  color: #79e3a7;
+  font-size: 18px;
+  color: #007C83;
   font-family: Manrope, sans-serif;
+  font-weight: 700;
   margin: 3px 0 0;
 }
 
-/* Visual 04: Evidence Panel */
+/* ==========================================================================
+   Visual 04: Evidence Panel — Institutional Information Card
+   ========================================================================== */
 .v-evidence-card {
   height: 100%;
-  background: #141b18;
-  border: 1px solid #263a2f;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .v-evidence-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #23342a;
+  border-bottom: 1px solid #D5E1DF;
   padding-bottom: 12px;
 }
 
 .v-evidence-header b {
-  font-size: 14px;
-  color: #edf3ee;
+  font-size: 13px;
+  color: #172121;
+  font-family: Manrope, sans-serif;
 }
 
 .v-evidence-header span {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
-  background: #192720;
-  border: 1px solid #365344;
-  color: #8ee4aa;
-  padding: 2px 6px;
+  background: #EEF7F6;
+  border: 1px solid #D5E1DF;
+  color: #007C83;
+  padding: 2px 8px;
   border-radius: 2px;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .v-evidence-scores {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 .v-score-box {
-  background: #0f1512;
-  border: 1px solid #223429;
-  padding: 14px;
+  background: #F5F7F7;
+  border: 1px solid #D5E1DF;
+  padding: 12px;
   border-radius: 4px;
 }
 
 .v-score-box small {
   display: block;
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
-  color: #7d9688;
+  color: #718080;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
 }
 
 .v-score-box strong {
   display: block;
-  font-size: 26px;
+  font-size: 24px;
   font-family: Manrope, sans-serif;
-  color: #6ce0e4;
+  color: #007C83;
+  font-weight: 700;
   margin: 4px 0 2px;
 }
 
 .v-score-box p {
   font-size: 10px;
-  color: #8ea396;
+  color: #718080;
   margin: 0;
   line-height: 1.4;
 }
@@ -544,7 +670,7 @@
 .v-evidence-rows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   flex: 1;
 }
 
@@ -552,122 +678,135 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #1c2b23;
+  border-bottom: 1px solid #D5E1DF;
   padding: 8px 0;
   font-size: 12px;
 }
 
+.v-evidence-row:last-child {
+  border-bottom: none;
+}
+
 .v-evidence-row span {
-  color: #9cb1a4;
+  color: #4F5C5C;
 }
 
 .v-evidence-row b {
-  color: #e3ebe5;
-  font-family: monospace;
+  color: #172121;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
 }
 
-/* Visual 05: Results Breakdown */
+/* ==========================================================================
+   Visual 05: Results — Semantic Status Classification
+   ========================================================================== */
 .v-results-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .v-outcome-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .v-outcome-card {
-  padding: 14px;
+  padding: 12px;
   border-radius: 4px;
-  border: 1px solid transparent;
-  background: #141c18;
+  border: 1px solid #D5E1DF;
+  background: #FFFFFF;
 }
 
 .v-outcome-card.matched {
-  border-color: #274f3a;
-  background: rgba(82, 196, 141, 0.08);
+  border-color: rgba(22, 132, 91, 0.35);
+  background: rgba(22, 132, 91, 0.05);
 }
 
 .v-outcome-card.needs_review {
-  border-color: #594723;
-  background: rgba(214, 168, 66, 0.08);
+  border-color: rgba(196, 134, 22, 0.35);
+  background: rgba(196, 134, 22, 0.05);
 }
 
 .v-outcome-card.conflict {
-  border-color: #5e2f29;
-  background: rgba(220, 93, 78, 0.08);
+  border-color: rgba(196, 71, 71, 0.35);
+  background: rgba(196, 71, 71, 0.05);
 }
 
 .v-outcome-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: monospace;
+  gap: 5px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
 }
 
-.v-outcome-card.matched .v-outcome-badge { color: #52c48d; }
-.v-outcome-card.needs_review .v-outcome-badge { color: #e4b44c; }
-.v-outcome-card.conflict .v-outcome-badge { color: #e86d5e; }
+.v-outcome-card.matched    .v-outcome-badge { color: #16845B; }
+.v-outcome-card.needs_review .v-outcome-badge { color: #C48616; }
+.v-outcome-card.conflict   .v-outcome-badge { color: #C44747; }
 
 .v-outcome-card h3 {
   margin: 6px 0 2px;
-  font-size: 20px;
+  font-size: 22px;
   font-family: Manrope, sans-serif;
-  color: #eff4ee;
+  color: #172121;
+  font-weight: 700;
 }
 
 .v-outcome-card p {
   font-size: 10px;
-  color: #8da496;
+  color: #718080;
   margin: 0;
   line-height: 1.4;
 }
 
 .v-results-map-preview {
   flex: 1;
-  border: 1px solid #25382e;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   position: relative;
-  background: #0f1512;
+  background: #F5F7F7;
   overflow: hidden;
 }
 
-/* Visual 06: Review Queue */
+/* ==========================================================================
+   Visual 06: Review Queue — Institutional Application Interface
+   ========================================================================== */
 .v-review-container {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .v-review-queue-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #23342b;
+  border-bottom: 1px solid #D5E1DF;
   padding-bottom: 10px;
   flex-shrink: 0;
 }
 
 .v-review-queue-header span {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
-  color: #d6a842;
-  letter-spacing: 1px;
+  color: #C48616;
+  letter-spacing: 0.8px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .v-review-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
 }
 
@@ -675,67 +814,73 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #141c18;
-  border: 1px solid #27392f;
-  padding: 12px 14px;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  padding: 10px 12px;
   border-radius: 4px;
 }
 
 .v-review-item.is-selected {
-  border-color: #559a78;
-  background: #182620;
+  border-color: #007C83;
+  background: #EEF7F6;
 }
 
 .v-review-item-id {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
-  font-weight: 700;
-  color: #eef4ee;
+  font-weight: 600;
+  color: #172121;
 }
 
 .v-review-item-meta {
   font-size: 10px;
-  color: #8ea396;
+  color: #718080;
   margin-top: 2px;
 }
 
 .v-review-triage-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
 .v-triage-btn {
-  background: #141c18;
-  border: 1px solid #27382f;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
   padding: 10px;
   border-radius: 4px;
   text-align: center;
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  color: #c8d6cd;
+  color: #172121;
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
 }
 
-.v-triage-btn.accept { border-color: #3b7454; color: #7ce3aa; }
-.v-triage-btn.reject { border-color: #7a3a33; color: #e87b70; }
-.v-triage-btn.investigate { border-color: #705828; color: #dfb858; }
+.v-triage-btn.accept     { border-color: rgba(22, 132, 91, 0.5);  color: #16845B;  background: rgba(22, 132, 91, 0.05); }
+.v-triage-btn.reject     { border-color: rgba(196, 71, 71, 0.5);  color: #C44747;  background: rgba(196, 71, 71, 0.05); }
+.v-triage-btn.investigate { border-color: rgba(196, 134, 22, 0.5); color: #C48616; background: rgba(196, 134, 22, 0.05); }
 
-/* Visual 07: Human Decision */
+/* ==========================================================================
+   Visual 07: Human Decision — Clean Record Interface
+   ========================================================================== */
 .v-decision-box {
   height: 100%;
-  background: #131b17;
-  border: 1px solid #26382e;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .v-decision-record-view {
-  background: #0e1411;
-  border: 1px solid #203127;
+  background: #F5F7F7;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   padding: 14px;
 }
@@ -749,14 +894,18 @@
 
 .v-decision-record-view dt {
   font-size: 10px;
-  color: #799183;
+  color: #718080;
+  font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .v-decision-record-view dd {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  color: #e4ede6;
+  color: #172121;
   margin: 0;
+  font-weight: 500;
 }
 
 .v-decision-status-change {
@@ -765,50 +914,55 @@
   justify-content: center;
   gap: 16px;
   padding: 14px;
-  background: #18241e;
-  border: 1px dashed #355342;
+  background: #EEF7F6;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
 }
 
 .v-badge-pill {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 10px;
   padding: 4px 10px;
   border-radius: 3px;
   text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
-.v-badge-pill.pending { background: #2f2512; color: #dfb248; border: 1px solid #634b1c; }
-.v-badge-pill.resolved { background: #132a1e; color: #6ae09f; border: 1px solid #2c6344; }
+.v-badge-pill.pending  { background: rgba(196, 134, 22, 0.1); color: #C48616; border: 1px solid rgba(196, 134, 22, 0.4); }
+.v-badge-pill.resolved { background: rgba(22, 132, 91, 0.1);  color: #16845B; border: 1px solid rgba(22, 132, 91, 0.4); }
 
 .v-decision-signature {
-  background: #101613;
-  border: 1px solid #223228;
-  padding: 14px;
-  border-radius: 4px;
+  background: #F5F7F7;
+  border: 1px solid #D5E1DF;
+  border-left: 3px solid #007C83;
+  padding: 12px 14px;
+  border-radius: 0 4px 4px 0;
   font-size: 11px;
-  color: #8da496;
+  color: #4F5C5C;
 }
 
 .v-decision-signature b {
-  color: #70dfb2;
+  color: #005F63;
 }
 
-/* Visual 08: Immutable Audit Trail */
+/* ==========================================================================
+   Visual 08: Immutable Audit Trail — Government Record System
+   ========================================================================== */
 .v-audit-timeline {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   overflow: auto;
 }
 
 .v-audit-node {
   display: flex;
-  gap: 14px;
-  background: #141c18;
-  border: 1px solid #26382e;
-  padding: 12px 16px;
+  gap: 12px;
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  padding: 12px 14px;
   border-radius: 4px;
   position: relative;
 }
@@ -816,11 +970,11 @@
 .v-audit-node::before {
   content: '';
   position: absolute;
-  left: 23px;
-  bottom: -11px;
+  left: 21px;
+  bottom: -9px;
   width: 2px;
-  height: 10px;
-  background: #2b3e34;
+  height: 8px;
+  background: #D5E1DF;
 }
 
 .v-audit-node:last-child::before {
@@ -831,12 +985,12 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #1e2e25;
-  border: 1px solid #426351;
+  background: #EEF7F6;
+  border: 1.5px solid #007C83;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #7de2ab;
+  color: #007C83;
   font-size: 9px;
   flex-shrink: 0;
   margin-top: 2px;
@@ -854,37 +1008,42 @@
 }
 
 .v-audit-content-head b {
-  font-family: monospace;
+  font-family: 'DM Sans', sans-serif;
   font-size: 11px;
-  color: #ecf3ed;
+  color: #172121;
+  font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .v-audit-content-head span {
   font-family: monospace;
   font-size: 9px;
-  color: #6a8274;
+  color: #718080;
 }
 
 .v-audit-content p {
   font-size: 11px;
-  color: #8ea396;
+  color: #4F5C5C;
   margin: 2px 0 0;
+  line-height: 1.5;
 }
 
-/* Visual 09: Reconciled Trusted Picture */
+/* ==========================================================================
+   Visual 09: Reconciled Trusted Picture — Final State
+   ========================================================================== */
 .v-trusted-composite {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .v-trusted-map-scene {
   flex: 1;
-  border: 1px solid #2d4538;
+  border: 1px solid #D5E1DF;
   border-radius: 4px;
   position: relative;
-  background: #0d1410;
+  background: #F5F7F7;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -892,9 +1051,10 @@
 }
 
 .v-trusted-certification {
-  background: #141f1a;
-  border: 1px solid #2d4739;
-  border-radius: 4px;
+  background: #EEF7F6;
+  border: 1px solid #D5E1DF;
+  border-top: 3px solid #007C83;
+  border-radius: 0 0 4px 4px;
   padding: 14px 18px;
   display: flex;
   align-items: center;
@@ -909,68 +1069,24 @@
 }
 
 .v-cert-badge svg {
-  color: #5ed696;
+  color: #007C83;
 }
 
 .v-cert-badge strong {
   display: block;
   font-size: 13px;
-  color: #f0f5ef;
+  color: #172121;
+  font-family: Manrope, sans-serif;
+  font-weight: 600;
 }
 
 .v-cert-badge small {
   display: block;
   font-size: 10px;
-  color: #8ba294;
+  color: #718080;
+  margin-top: 1px;
 }
 
-/* ==========================================================================
-   Transition into Actual Workspace
-   ========================================================================== */
-.workspace-transition-banner {
-  background: #101613;
-  border-top: 1px solid #213028;
-  padding: 60px 0 30px;
-  text-align: center;
-}
-
-.workspace-transition-banner h2 {
-  font-family: Manrope, sans-serif;
-  font-size: clamp(32px, 3.4vw, 52px);
-  color: #eef3eb;
-  font-weight: 700;
-  margin: 0 0 10px;
-  letter-spacing: -1px;
-}
-
-.workspace-transition-banner p {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 16px;
-  color: #9cb1a4;
-  margin: 0 0 24px;
-}
-
-.workspace-transition-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: #52c48d;
-  color: #0c1812 !important;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  padding: 14px 28px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  box-shadow: 0 6px 20px rgba(82, 196, 141, 0.2);
-}
-
-.workspace-transition-cta:hover {
-  background: #6fe4a7;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(82, 196, 141, 0.3);
-}
 
 /* ==========================================================================
    Responsive & Accessibility
@@ -982,6 +1098,9 @@
   .pipeline-grid {
     grid-template-columns: 45% 55%;
     gap: 32px;
+  }
+  .pipeline-progress-track {
+    padding: 0 24px;
   }
 }
 
@@ -995,7 +1114,7 @@
     gap: 0;
   }
   .pipeline-visual-column {
-    display: none; /* In mobile fallback, visual renders within individual stage flow */
+    display: none;
   }
   .pipeline-stage-item {
     min-height: auto;
@@ -1005,10 +1124,10 @@
     display: block;
     margin-top: 24px;
     height: 380px;
-    border: 1px solid #25382e;
+    border: 1px solid #D5E1DF;
     border-radius: 4px;
     overflow: hidden;
-    background: #111714;
+    background: #FFFFFF;
   }
 }
 

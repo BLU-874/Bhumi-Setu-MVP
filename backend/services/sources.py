@@ -3,6 +3,7 @@ from uuid import uuid4
 from functools import lru_cache
 
 from data.generate import generate, LABEL
+from data.study_area import STUDY_AREA
 from domain.normalization import prepare_feature, reproject, METRIC_CRS, DISPLAY_CRS
 from services.derived_footprints import validate_collection, PROVENANCE_FIELDS
 from services.reference_dataset import SOURCE_ID as REFERENCE_ID, SOURCE_TYPE as REFERENCE_TYPE
@@ -49,6 +50,8 @@ def prepare_source(kind, name, source_crs, collection, source_id=None, source_ty
         'id':source_id or str(uuid4()), 'kind':kind, 'name':name,
         'label': LABEL, 'feature_count':len(features), 'source_crs':source_crs,
         'analysis_crs':METRIC_CRS, 'display_crs':DISPLAY_CRS,
+        'study_area_origin': [STUDY_AREA['origin_lon'], STUDY_AREA['origin_lat']],
+        'study_area_name': STUDY_AREA['name'],
         'fields': sorted({k for f in features for k in f['properties']}),
         'status':'ready', 'quality': {
             'invalid_geometries':sum(not f['quality']['original_valid'] for f in features),

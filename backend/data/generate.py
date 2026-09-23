@@ -13,6 +13,7 @@ from shapely.affinity import rotate, scale, translate
 from shapely.geometry import Point, Polygon, box, mapping
 
 from domain.normalization import reproject
+from data.study_area import STUDY_AREA
 
 SEED = 26013
 LABEL = 'Synthetic demonstration dataset'
@@ -24,9 +25,11 @@ OWNERS = ['Rajesh Kumar', 'Sunita Deshmukh', 'Anita Kulkarni', 'Ganesh Pawar',
           'Meena Shinde', 'Ramesh Patil', 'Kavita Jadhav', 'Vikram Joshi']
 
 
-def generate():
+def generate(origin_lon=None, origin_lat=None):
     rng = random.Random(SEED)
-    origin_x, origin_y = Transformer.from_crs(4326, 32643, always_xy=True).transform(73.8567, 18.5204)
+    lon = STUDY_AREA['origin_lon'] if origin_lon is None else origin_lon
+    lat = STUDY_AREA['origin_lat'] if origin_lat is None else origin_lat
+    origin_x, origin_y = Transformer.from_crs(4326, 32643, always_xy=True).transform(lon, lat)
     layers = {k: {'type': 'FeatureCollection', 'features': []} for k in ('cadastral', 'buildings', 'gnss')}
     layers['gnss']['crs'] = {'type': 'name', 'properties': {'name': 'urn:ogc:def:crs:EPSG::32643'}}
     layers['buildings']['crs'] = {'type': 'name', 'properties': {'name': 'urn:ogc:def:crs:EPSG::32643'}}

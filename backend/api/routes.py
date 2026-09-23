@@ -10,9 +10,15 @@ from services.reference_dataset import SOURCE_ID as REFERENCE_ID, prepared_refer
 from services.reconciliation import execute
 from persistence.verification import verify
 from persistence.store import ReviewConflict
+from data.study_area import STUDY_AREA
 
 router = APIRouter(prefix='/api')
 run_lock = Lock()
+
+
+@router.get('/study-area')
+def study_area():
+    return STUDY_AREA
 
 
 def store(request):
@@ -179,6 +185,26 @@ def audit(request: Request, run_id: str | None=None, record_id: str | None=None,
     if not 1 <= limit <= 500 or offset < 0:
         raise HTTPException(422,'Invalid pagination')
     return store(request).audit(run_id,record_id,limit,offset)
+
+
+class AuditLogInput(BaseModel):
+    run_id: str
+    record_id: str
+    actor: str = Field(default='Officer', min_length=1, max_length=120)
+    action: str = Field(min_length=1, max_length=100)
+    metadata: dict | None = None
+
+
+@router.post('/audit-events', status_code=201)
+def record_audit_event(payload: AuditLogInput, request: Request):
+    try:
+        return store(request).log_audit_event(
+            payload.run_id, payload.record_id, payload.actor, payload.action, payload.metadata
+        )
+    except LookupError as exc:
+        raise HTTPException(404, str(exc))
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
 
 
 @router.post('/harmonize')

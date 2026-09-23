@@ -215,23 +215,122 @@ class Store:
                     json.dumps({k:v for k,v in before.items() if k!='feature'}),json.dumps(after),timestamp))
             return {**after,'feature':before['feature']}
 
+    def log_audit_event(self, run_id, record_id, actor, action, metadata=None):
+        with self.connect() as c:
+            row = c.execute(self.sql('''SELECT r.project_id FROM harmonization_runs r
+                JOIN harmonized_records h ON h.run_id=r.id WHERE r.id=? AND h.id=?'''), (run_id, record_id)).fetchone()
+            if not row:
+                raise LookupError('Invalid run or record reference')
+            project_id = row[0]
+            timestamp = datetime.now(timezone.utc).isoformat()
+            c.execute(self.sql('''INSERT INTO audit_events(project_id,run_id,record_id,actor,action,before_data,after_data,created_at)
+                VALUES (?,?,?,?,?,?,?,?)'''),
+                (project_id, run_id, record_id, actor.strip() or 'Officer', action,
+                 json.dumps({'type': action}), json.dumps(metadata or {}), timestamp))
+            return {'status': 'recorded', 'action': action, 'actor': actor.strip() or 'Officer', 'timestamp': timestamp}
+
     def audit(self, run_id=None, record_id=None, limit=100, offset=0):
         clauses,params=[],[]
         for field,value in [('run_id',run_id),('record_id',record_id)]:
             if value:
                 clauses.append(field+'=?'); params.append(value)
         where=' WHERE '+' AND '.join(clauses) if clauses else ''
+        where_a=' WHERE '+' AND '.join(['a.'+c for c in clauses]) if clauses else ''
         with self.connect() as c:
             total=c.execute(self.sql('SELECT count(*) FROM audit_events'+where),tuple(params)).fetchone()[0]
-            rows=c.execute(self.sql('''SELECT id,project_id,run_id,record_id,actor,action,before_data,after_data,created_at
-                FROM audit_events'''+where+' ORDER BY id DESC LIMIT ? OFFSET ?'),tuple(params+[limit,offset])).fetchall()
+            rows=c.execute(self.sql('''SELECT a.id,a.project_id,a.run_id,a.record_id,a.actor,a.action,a.before_data,a.after_data,a.created_at,
+                h.feature, r.payload
+                FROM audit_events a
+                LEFT JOIN harmonized_records h ON h.run_id=a.run_id AND h.id=a.record_id
+                LEFT JOIN harmonization_runs r ON r.id=a.run_id
+                '''+where_a+' ORDER BY a.id DESC LIMIT ? OFFSET ?'),tuple(params+[limit,offset])).fetchall()
             events=[]
             for row in rows:
-                event=dict(zip(('id','project_id','run_id','record_id','actor','action','before','after','timestamp'),row))
+                event=dict(zip(('id','project_id','run_id','record_id','actor','action','before','after','timestamp'),row[:9]))
                 event['before']=self.decode(event['before']);event['after']=self.decode(event['after'])
                 event['timestamp']=str(event['timestamp'])
+                if row[9] is not None:
+                    event['record']=self.decode(row[9])
+                if row[10] is not None:
+                    event['run']=self.decode(row[10])
                 events.append(event)
             return {'events':events,'total':total,'limit':limit,'offset':offset}
+
+    def sync_study_area(self, study_area):
+        """Ensure all synthetic geometries and results match the configured study area origin."""
+        target_lon = study_area['origin_lon']
+        target_lat = study_area['origin_lat']
+        from pyproj import Transformer
+        from shapely.geometry import shape, mapping
+        from shapely.affinity import translate
+        from domain.normalization import METRIC_CRS, DISPLAY_CRS, reproject
+
+        t_to_metric = Transformer.from_crs(4326, 32643, always_xy=True)
+        target_x, target_y = t_to_metric.transform(target_lon, target_lat)
+
+        with self.connect() as c:
+            cad_meta_row = c.execute(self.sql("SELECT metadata FROM data_sources WHERE id='cadastral'")).fetchone()
+            if not cad_meta_row:
+                return 0, 0
+            cad_meta = self.decode(cad_meta_row[0])
+            cur_origin = cad_meta.get('study_area_origin')
+            if cur_origin:
+                cur_x, cur_y = t_to_metric.transform(cur_origin[0], cur_origin[1])
+            else:
+                cur_x, cur_y = t_to_metric.transform(73.8567, 18.5204)
+
+            dx = target_x - cur_x
+            dy = target_y - cur_y
+            if abs(dx) < 0.01 and abs(dy) < 0.01:
+                return 0, 0
+
+            # 1. Translate synthetic source_features (stored in METRIC_CRS)
+            sf_rows = c.execute(self.sql("SELECT source_id, id, payload FROM source_features WHERE source_id IN ('cadastral','buildings','gnss')")).fetchall()
+            updated_sf = []
+            for sid, fid, raw_payload in sf_rows:
+                p = self.decode(raw_payload)
+                g = shape(p['geometry'])
+                new_g = translate(g, dx, dy)
+                p['geometry'] = mapping(new_g)
+                if 'original_geometry' in p:
+                    if sid == 'cadastral':
+                        orig_g = shape(reproject(p['original_geometry'], DISPLAY_CRS, METRIC_CRS))
+                        p['original_geometry'] = reproject(mapping(translate(orig_g, dx, dy)), METRIC_CRS, DISPLAY_CRS)
+                    else:
+                        orig_g = shape(p['original_geometry'])
+                        p['original_geometry'] = mapping(translate(orig_g, dx, dy))
+                if 'normalized_original_geometry' in p:
+                    norm_g = shape(p['normalized_original_geometry'])
+                    p['normalized_original_geometry'] = mapping(translate(norm_g, dx, dy))
+                updated_sf.append((json.dumps(p), sid, fid))
+
+            c.executemany(self.sql("UPDATE source_features SET payload=? WHERE source_id=? AND id=?"), updated_sf)
+
+            # 2. Update data_sources metadata with new study_area_origin and name
+            for sid in ('cadastral', 'buildings', 'gnss'):
+                row = c.execute(self.sql("SELECT metadata FROM data_sources WHERE id=?"), (sid,)).fetchone()
+                if row:
+                    meta = self.decode(row[0])
+                    meta['study_area_origin'] = [target_lon, target_lat]
+                    meta['study_area_name'] = study_area['name']
+                    c.execute(self.sql("UPDATE data_sources SET metadata=? WHERE id=?"), (json.dumps(meta), sid))
+
+            # 3. Translate harmonized_records (stored in DISPLAY_CRS EPSG:4326)
+            hr_rows = c.execute(self.sql("SELECT run_id, id, feature FROM harmonized_records")).fetchall()
+            updated_hr = []
+            for run_id, fid, raw_feature in hr_rows:
+                f = self.decode(raw_feature)
+                metric_g = shape(reproject(f['geometry'], DISPLAY_CRS, METRIC_CRS))
+                new_metric_g = translate(metric_g, dx, dy)
+                f['geometry'] = reproject(mapping(new_metric_g), METRIC_CRS, DISPLAY_CRS)
+                updated_hr.append((json.dumps(f), run_id, fid))
+
+            c.executemany(self.sql("UPDATE harmonized_records SET feature=? WHERE run_id=? AND id=?"), updated_hr)
+
+            # 4. Update projects table
+            c.execute(self.sql("UPDATE projects SET name=? WHERE id='pune-demo'"), (study_area['name'],))
+
+            return dx, dy
 
 
 class ReviewConflict(Exception):

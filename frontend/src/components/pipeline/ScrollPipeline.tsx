@@ -98,6 +98,10 @@ const STAGES: StageData[] = [
       'When automation encounters boundary ambiguities, multi-candidate building footprints, or attribute discrepancies, records are routed to an interactive officer review queue with full spatial evidence.',
     tags: ['Officer Queue', 'Multi-Candidate Inspection', 'Dispute Routing'],
     accentTags: ['Accept', 'Reject', 'Investigate'],
+    cta: {
+      label: 'Review uncertain cases',
+      to: '/review',
+    },
     evidenceStrip: {
       tag: 'HUMAN OVERSIGHT',
       title: 'Preserved Ambiguity, Not Guesswork',
@@ -113,6 +117,10 @@ const STAGES: StageData[] = [
       'Binding legal reconciliation requires human accountability. Officers record decisions accompanied by officer identity credentials, justification notes, and concurrency-safe version locks.',
     tags: ['Officer Accountability', 'Legal Standing', 'Version Locking'],
     accentTags: ['Binding Sign-off', 'Reviewer Notes'],
+    cta: {
+      label: 'Open Review Queue',
+      to: '/review',
+    },
     evidenceStrip: {
       tag: 'LEGAL CERTAINTY',
       title: 'State Transition & Officer Signature',

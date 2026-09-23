@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from persistence.store import ROOT, Store
 from services.sources import demo_sources
+from data.study_area import STUDY_AREA
 from api.routes import router
 
 load_dotenv(ROOT / '.env')
@@ -19,6 +20,8 @@ def create_app(database=None):
         db.initialize()
         if not db.url and not db.sources():
             db.seed(demo_sources())
+        else:
+            db.sync_study_area(STUDY_AREA)
         app.state.store = db
         yield
 

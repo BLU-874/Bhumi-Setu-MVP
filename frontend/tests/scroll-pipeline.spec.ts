@@ -55,20 +55,16 @@ test('continuous 9-stage scroll pipeline renders all stages, sticky visual, and 
   await page.waitForTimeout(400);
   await page.screenshot({path: '../artifacts/ui04-pipeline-stage-09.png'});
 
-  // 7. Verify Transition to Actual Workspace
-  const transitionBanner = page.locator('.workspace-transition-banner');
-  await expect(transitionBanner.getByRole('heading', {name: 'Now investigate the map.'})).toBeVisible();
-  await expect(transitionBanner).toContainText('Select a parcel. Inspect its evidence. Trace its source.');
-
-  const exploreBtn = transitionBanner.locator('.workspace-transition-cta');
-  await expect(exploreBtn).toBeVisible();
-  await expect(exploreBtn).toContainText('EXPLORE WORKSPACE');
-  await page.screenshot({path: '../artifacts/ui04-pipeline-transition.png'});
+  // 7. Verify Transition to Actual Workspace (Phase UI-08 direct transition)
+  const entryHeader = page.locator('.workspace-entry-header');
+  await expect(entryHeader.locator('.workspace-entry-badge')).toContainText('BHUMI-SETU WORKSPACE');
+  await expect(entryHeader.locator('.workspace-entry-title')).toContainText('Inspect the reconciled cadastre on the ground.');
+  await page.screenshot({path: '../artifacts/ui08-pipeline-transition.png'});
 
   // 8. Verify the Live Workspace is present and intact
   const workspace = page.locator('#workspace.workspace-section');
   await workspace.scrollIntoViewIfNeeded();
-  await expect(workspace.locator('.workspace-chrome')).toContainText('LIVE VECTOR WORKSPACE');
+  await expect(workspace.locator('.landing-workspace-frame')).toBeVisible();
   await expect(workspace.getByRole('button', {name: 'Synthetic Benchmark', exact: true})).toHaveAttribute('aria-pressed', 'true');
 
   // 9. Responsive layout checks across viewports

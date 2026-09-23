@@ -3,7 +3,6 @@ import {Link, useSearchParams} from 'react-router-dom';
 import {
   ArrowRight,
   ArrowUpRight,
-  Layers3,
   Menu,
   X,
   Compass,
@@ -64,12 +63,12 @@ export default function Landing({
 
       {/* Persistent Header */}
       <header className="landing-header">
-        <Link to="/" className="landing-brand" aria-label="Bhumi-Setu home">
-          <Layers3 size={32} />
-          <span>
-            BHUMI-SETU
-            <small>Unified Land. Stronger India.</small>
-          </span>
+        <Link to="/" className="landing-brand" aria-label="Bhumi-Setu home" title="भूमि-सेतु | BHUMI-SETU">
+          <img
+            src="/images/bhumi-setu-logo-light.png"
+            alt="भूमि-सेतु | BHUMI-SETU — Land Data. Connected."
+            className="landing-brand-logo"
+          />
         </Link>
 
         <button
@@ -108,70 +107,39 @@ export default function Landing({
         {/* 02 — ONE LARGE SCROLL-DRIVEN PIPELINE (Stages 01 — 09) */}
         <ScrollPipeline layers={layers} results={results} controls={controls} />
 
-        {/* 03 — ACTUAL WORKSPACE TRANSITION & LIVE WORKSPACE */}
-        <section className="workspace-transition-banner">
-          <div className="landing-container">
-            <p className="landing-eyebrow" style={{justifyContent: 'center'}}>
-              <span></span> REAL PRODUCT INTERACTION
-            </p>
-            <h2>Now investigate the map.</h2>
-            <p>Select a parcel. Inspect its evidence. Trace its source.</p>
-            <button className="workspace-transition-cta" onClick={scrollToWorkspace}>
-              EXPLORE WORKSPACE <ArrowRight size={16} />
-            </button>
-          </div>
-        </section>
-
+        {/* 03 — BHUMI-SETU WORKSPACE (Direct, clean product transition) */}
         <section id="workspace" ref={preview} className="landing-section landing-container workspace-section">
-          <div className="wide-section-heading">
-            <div>
-              <p className="landing-eyebrow">LIVE INTERACTIVE CADASTRE</p>
-              <h2>
-                The Bhumi-Setu Workspace.<br />
-                <span>Direct analysis & verification.</span>
+          <div className="workspace-entry-header">
+            <div className="workspace-entry-narrative">
+              <span className="workspace-entry-badge">BHUMI-SETU WORKSPACE</span>
+              <h2 className="workspace-entry-title">
+                Inspect the reconciled cadastre on the ground.
               </h2>
+              <p className="workspace-entry-subhead">
+                Select sources. Run reconciliation. Inspect evidence. Review uncertainty.
+              </p>
             </div>
-            <Link to="/map" className="landing-text-button">
-              Open full workspace <ArrowUpRight size={17} />
+            <Link to="/map" className="workspace-entry-fullscreen-btn" title="Open full WebGIS workspace">
+              Full workspace view <ArrowUpRight size={15} />
             </Link>
           </div>
 
-          <div className="workspace-context">
-            <p>
-              <b>Synthetic Benchmark</b> · Pune Study Area<br />
-              <span>Controlled cadastral, building and GNSS sources for reconciliation.</span>
-            </p>
-            <p>
-              <b>Real-World Dataset</b> · Lalpur, Ahmedabad, Gujarat<br />
-              <span>Authentic building annotations and provenance. Not a cadastral benchmark.</span>
-            </p>
-          </div>
-
-          <div className="landing-workspace">
-            <div className="workspace-chrome">
-              <span>
-                <Layers3 size={17} /> BHUMI-SETU <i /> LIVE VECTOR WORKSPACE
-              </span>
-              <Link to="/data-sources">
-                Data sources <ArrowUpRight size={14} />
-              </Link>
-            </div>
-
+          <div className="landing-workspace landing-workspace-frame">
             {showWorkspace ? (
-              <Suspense fallback={<p className="workspace-loading">Loading workspace…</p>}>
+              <Suspense fallback={<div className="workspace-loading-state">Loading live geospatial workspace…</div>}>
                 <Workspace layers={layers} results={results} controls={controls} embedded />
               </Suspense>
             ) : (
-              <div className="workspace-loading">
-                Actual source layers, evidence and provenance. The interactive map loads as you approach.
+              <div className="workspace-loading-placeholder">
+                Interactive geospatial cadastre loading as you approach…
               </div>
             )}
           </div>
 
           <p className="landing-caption">
-            The working application, using source geometry from the backend. Satellite basemap for geographic context; synthetic overlays are not official land boundaries.{' '}
-            <Link to="/harmonization">
-              Run a comparison <ArrowRight size={14} />
+            Live demonstrator executing WGS84 / UTM 43N spatial reconciliation against synthetic ground truth. All calculations run client/server live.{' '}
+            <Link to="/overview">
+              System architecture <ArrowRight size={14} />
             </Link>
           </p>
         </section>
@@ -179,12 +147,12 @@ export default function Landing({
 
       {/* Footer */}
       <footer className="landing-footer landing-container">
-        <Link to="/" className="landing-brand">
-          <Layers3 size={24} />
-          <span>
-            BHUMI-SETU
-            <small>Unified Land. Stronger India.</small>
-          </span>
+        <Link to="/" className="landing-brand" aria-label="Bhumi-Setu home" title="भूमि-सेतु | BHUMI-SETU">
+          <img
+            src="/images/bhumi-setu-logo.png"
+            alt="भूमि-सेतु | BHUMI-SETU — Land Data. Connected."
+            className="landing-brand-logo landing-footer-logo"
+          />
         </Link>
         <p>
           Intelligent Geospatial Reconciliation<br />

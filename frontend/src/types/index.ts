@@ -12,7 +12,7 @@ export type ResultFeature = Feature<Geometry,ResultProps>;
 export type Results = FeatureCollection<Geometry,ResultProps> & {summary:Summary|null;run_id:string|null};
 export type Layers = {cadastral:FeatureCollection;buildings:FeatureCollection;gnss:FeatureCollection;droneBuildings?:FeatureCollection;buildingSourceId?:string};
 export type ReviewCase = {id:string;run_id:string;record_id:string;status:'pending'|'investigating'|'resolved';decision:'accepted'|'rejected'|'investigate'|null;reviewer:string|null;note:string|null;decided_at:string|null;version:number;feature:ResultFeature};
-export type AuditEvent = {id:number;project_id:string;run_id:string;record_id:string;actor:string;action:string;before:Record<string,unknown>;after:Record<string,unknown>;timestamp:string};
+export type AuditEvent = {id:number;project_id:string;run_id:string;record_id:string;actor:string;action:string;before:Record<string,unknown>;after:Record<string,unknown>;timestamp:string;record?:ResultFeature;run?:Record<string,unknown>};
 
 export type ReferenceSource = Omit<Source,'source_type'> & {
  source_type:'real_world_orthophoto_building_data';dataset_type:'real_world_reference';location:string;

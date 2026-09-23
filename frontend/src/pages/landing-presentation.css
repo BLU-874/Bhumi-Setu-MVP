@@ -1,36 +1,164 @@
-/* Continuous editorial presentation; all workspace controls use existing data. */
-.cinematic-landing{--landing-bg:#101110;--landing-text:#edeee7}
-.cinematic-landing .landing-section{background:#101110;color:#edeee7}
-.cinematic-landing .landing-section h2{color:#edeee7}
-.cinematic-landing .landing-section h2 span{color:#aab69c}
-.cinematic-landing .landing-eyebrow{color:#a3ad96}
-.cinematic-landing .landing-text-button{color:#d6dccd}
-.cinematic-landing .wide-section-heading>p,.cinematic-landing .section-intro>p:not(.landing-eyebrow){color:#aeb5a5}
-.cinematic-landing .landing-pipeline{grid-template-columns:repeat(5,minmax(0,1fr));gap:25px}
-.cinematic-landing .landing-pipeline li{border-color:#4e5546;padding-right:0}
-.cinematic-landing .landing-pipeline h3{font-size:12px;letter-spacing:1.5px;color:#e6e9dc}
-.cinematic-landing .landing-pipeline p{max-width:220px;color:#aeb5a5;font-size:12px}
-.cinematic-landing .pipeline-number{color:#9daa8c}
-.cinematic-landing .pipeline-note{border-color:#343c2d;color:#b6c0a9}
-.cinematic-landing .workspace-section{max-width:1680px;width:94%;padding-top:45px}
-.cinematic-landing .workspace-context{color:#d9dece;border-color:#3c4434}
-.cinematic-landing .workspace-context span{color:#a6ae9b}
-.cinematic-landing .landing-workspace{background:#191e19;border-color:#3c4439;border-radius:3px;box-shadow:none}
-.cinematic-landing .workspace-chrome{background:#1d241d;border-color:#3d4638;color:#dae1d1}
-.cinematic-landing .landing-workspace .map-toolbar{background:#20271f;border-color:#3c4737;color:#d0d9c7}
-.cinematic-landing .landing-workspace .map-panel{grid-template-columns:145px minmax(0,1fr)}
-.cinematic-landing .landing-workspace .workspace-map{height:600px}
-.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:minmax(0,1fr) 265px}
-.cinematic-landing .landing-workspace :is(.map-panel,.panel,.source-card,.evidence){background:#1d241d;border-color:#3a4536;color:#d2dccb}
-.cinematic-landing .landing-workspace .evidence{max-height:670px}
-.cinematic-landing .landing-workspace .map-bottom{color:#bac6ad;border-color:#3c4737}
-.cinematic-landing .landing-workspace .leaflet-container{background:#353c31;background-image:none}
-.cinematic-landing .landing-workspace .leaflet-control-attribution{background:#111b12e8;color:#d9e2d2;font-size:9px}
-.cinematic-landing .landing-workspace .leaflet-control-attribution a{color:#d9e2d2}
-.cinematic-landing .landing-evidence-card{background:#1b221b;border-color:#414b39;box-shadow:none}
-.cinematic-landing .provenance-section{background:#171c16;border-color:#313b2c}
-.cinematic-landing .final-cta{background:#101110}
-.cinematic-landing .landing-footer{color:#c9d0c0;border-color:#343d2d}
-@media(max-width:1180px){.cinematic-landing .landing-workspace .map-panel{grid-template-columns:125px minmax(0,1fr)}.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:minmax(0,1fr) 235px}}
-@media(max-width:950px){.cinematic-landing .landing-pipeline{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:35px}.cinematic-landing .landing-workspace .gis-layout.has-evidence{grid-template-columns:1fr}.cinematic-landing .landing-workspace .workspace-map{height:520px}}
-@media(max-width:600px){.cinematic-landing .landing-pipeline{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 20px}.cinematic-landing .workspace-section{width:94%}.cinematic-landing .landing-workspace .map-panel{display:block}.cinematic-landing .landing-workspace .workspace-map{height:410px}.cinematic-landing .landing-workspace .map-toolbar label{width:auto}.cinematic-landing .landing-workspace .map-caption{font-size:7px}}
+/* ==========================================================================
+   Bhumi-Setu — Cinematic Landing Presentation Overrides
+   Government of India Institutional Visual System
+   ========================================================================== */
+
+/* Override cinematic-landing dark theme to institutional light theme */
+.cinematic-landing {
+  --landing-bg: #F5F7F7;
+  --landing-text: #172121;
+}
+
+/* Section backgrounds — alternating institutional surfaces */
+.cinematic-landing .landing-section {
+  background: #FFFFFF;
+  color: #172121;
+}
+
+.cinematic-landing .landing-section h2 { color: #172121; }
+.cinematic-landing .landing-section h2 span { color: #4F5C5C; }
+.cinematic-landing .landing-eyebrow { color: #007C83; }
+.cinematic-landing .landing-text-button { color: #005F63; }
+.cinematic-landing .wide-section-heading > p,
+.cinematic-landing .section-intro > p:not(.landing-eyebrow) { color: #4F5C5C; }
+
+/* Pipeline steps in workflow section */
+.cinematic-landing .landing-pipeline { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 25px; }
+.cinematic-landing .landing-pipeline li { border-color: #D5E1DF; padding-right: 0; }
+.cinematic-landing .landing-pipeline h3 { font-size: 12px; letter-spacing: .5px; color: #172121; }
+.cinematic-landing .landing-pipeline p { max-width: 220px; color: #718080; font-size: 12px; }
+.cinematic-landing .pipeline-number { color: #007C83; background: #EEF7F6; border-color: #D5E1DF; }
+.cinematic-landing .pipeline-note { border-color: #D5E1DF; color: #4F5C5C; }
+
+/* Workflow section — pale teal (CoWIN-style section break) */
+.cinematic-landing .workflow-section { background: #EEF7F6; border-color: #D5E1DF; }
+
+/* Workspace section — Direct, clean product entry */
+.cinematic-landing .workspace-section {
+  max-width: 1680px;
+  width: 94%;
+  padding-top: 40px;
+  padding-bottom: 20px;
+}
+
+.workspace-entry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.workspace-entry-narrative {
+  max-width: 820px;
+}
+.workspace-entry-badge {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #007C83;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.workspace-entry-title {
+  font-family: Manrope, sans-serif;
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: 700;
+  color: #172121;
+  margin: 0 0 6px;
+  letter-spacing: -0.8px;
+  line-height: 1.25;
+}
+.workspace-entry-subhead {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #4F5C5C;
+  line-height: 1.5;
+  margin: 0;
+}
+.workspace-entry-fullscreen-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #D5E1DF;
+  border-radius: 4px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #005F63;
+  text-decoration: none;
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+  margin-bottom: 4px;
+}
+.workspace-entry-fullscreen-btn:hover {
+  background: #EEF7F6;
+  border-color: #007C83;
+  color: #007C83;
+}
+
+/* Workspace Frame: Real Product Visual Shell */
+.landing-workspace-frame {
+  background: #FFFFFF;
+  border: 1px solid #D5E1DF;
+  border-radius: 6px;
+  box-shadow: 0 2px 16px rgba(0, 95, 99, 0.05);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.workspace-loading-state,
+.workspace-loading-placeholder {
+  padding: 80px 20px;
+  text-align: center;
+  color: #718080;
+  font-size: 14px;
+  background: #FFFFFF;
+}
+
+.cinematic-landing .workspace-context { color: #172121; border-color: #D5E1DF; }
+.cinematic-landing .workspace-context span { color: #718080; }
+
+.cinematic-landing .landing-workspace-frame :is(.map-panel, .panel, .source-card, .evidence) {
+  background: #FFFFFF;
+  border-color: #D5E1DF;
+  color: #172121;
+}
+.cinematic-landing .landing-workspace-frame .evidence { max-height: 670px; }
+.cinematic-landing .landing-workspace-frame .map-bottom { color: #718080; border-color: #D5E1DF; }
+
+/* Leaflet in cinematic landing */
+.cinematic-landing .landing-workspace .leaflet-container { background: #E8EDEC; background-image: none; }
+.cinematic-landing .landing-workspace .leaflet-control-attribution { background: rgba(255,255,255,.9); color: #718080; font-size: 9px; }
+.cinematic-landing .landing-workspace .leaflet-control-attribution a { color: #007C83; }
+
+/* Evidence card */
+.cinematic-landing .landing-evidence-card { background: #FFFFFF; border-color: #D5E1DF; border-top-color: #007C83; box-shadow: none; }
+
+/* Provenance */
+.cinematic-landing .provenance-section { background: #F3F6F8; border-color: #D5E1DF; }
+
+/* CTA + footer */
+.cinematic-landing .final-cta { background: #EEF7F6; }
+.cinematic-landing .landing-footer { color: #4F5C5C; border-color: #D5E1DF; background: #FFFFFF; }
+
+@media (max-width: 1180px) {
+  .cinematic-landing .landing-workspace .map-panel { grid-template-columns: 125px minmax(0, 1fr); }
+  .cinematic-landing .landing-workspace .gis-layout.has-evidence { grid-template-columns: minmax(0, 1fr) 235px; }
+}
+
+@media (max-width: 950px) {
+  .cinematic-landing .landing-pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 35px; }
+  .cinematic-landing .landing-workspace .gis-layout.has-evidence { grid-template-columns: 1fr; }
+  .cinematic-landing .landing-workspace .workspace-map { height: 520px; }
+}
+
+@media (max-width: 600px) {
+  .cinematic-landing .landing-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 20px; }
+  .cinematic-landing .workspace-section { width: 94%; }
+  .cinematic-landing .landing-workspace .map-panel { display: block; }
+  .cinematic-landing .landing-workspace .workspace-map { height: 410px; }
+  .cinematic-landing .landing-workspace .map-toolbar label { width: auto; }
+  .cinematic-landing .landing-workspace .map-caption { font-size: 7px; }
+}

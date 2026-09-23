@@ -1,4 +1,6 @@
 import {useEffect, useRef, type ReactNode} from 'react';
+import {Link} from 'react-router-dom';
+import {ArrowRight} from 'lucide-react';
 
 export interface StageData {
   id: string;
@@ -10,6 +12,10 @@ export interface StageData {
   description: string;
   tags?: string[];
   accentTags?: string[];
+  cta?: {
+    label: string;
+    to: string;
+  };
   evidenceStrip?: {
     tag: string;
     title: string;
@@ -96,6 +102,14 @@ export default function PipelineStage({
           <span>{stage.evidenceStrip.tag}</span>
           <strong>{stage.evidenceStrip.title}</strong>
           <p>{stage.evidenceStrip.body}</p>
+        </div>
+      )}
+
+      {stage.cta && (
+        <div className="stage-cta-wrap">
+          <Link to={stage.cta.to} className="stage-action-cta">
+            {stage.cta.label} <ArrowRight size={15} />
+          </Link>
         </div>
       )}
 

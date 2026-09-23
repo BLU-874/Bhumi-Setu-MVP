@@ -1,4 +1,5 @@
 import {useMemo} from 'react';
+import {Link} from 'react-router-dom';
 import {motion, AnimatePresence} from 'framer-motion';
 import {
   Layers3,
@@ -10,6 +11,7 @@ import {
   History,
   Compass,
   ArrowRight,
+  ArrowUpRight,
   Database,
   Crosshair,
   UserCheck,
@@ -52,7 +54,7 @@ export default function PipelineVisual({
         <div className="visual-chrome-left">
           <span className="visual-chrome-dot" />
           <span>BHUMI-SETU ENGINE</span>
-          <span style={{color: '#385042'}}>·</span>
+          <span style={{color: '#D5E1DF'}}>·</span>
           <span className="visual-chrome-mode">
             {currentStage === 0 && 'STAGE 01 — SOURCE INGEST'}
             {currentStage === 1 && 'STAGE 02 — CRS & SCHEMA NORMALIZATION'}
@@ -66,8 +68,8 @@ export default function PipelineVisual({
           </span>
         </div>
         <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-          <span style={{color: '#658172'}}>WGS84 / UTM 43N</span>
-          <Compass size={13} style={{color: '#62cfdf'}} />
+          <span style={{color: '#718080'}}>WGS84 / UTM 43N</span>
+          <Compass size={13} style={{color: '#007C83'}} />
         </div>
       </div>
 
@@ -136,44 +138,44 @@ export default function PipelineVisual({
                   <svg width="100%" height="100%" style={{position: 'absolute', inset: 0}}>
                     <defs>
                       <pattern id="grid-pattern" width="30" height="30" patternUnits="userSpaceOnUse">
-                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(50, 75, 62, 0.3)" strokeWidth="1" />
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(213,225,223,0.7)" strokeWidth="1" />
                       </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#grid-pattern)" />
                     
-                    {/* Unaligned legacy dashed boundary */}
+                    {/* Unaligned legacy dashed boundary — Cadastral/Survey colour */}
                     <path
                       d="M 80 180 L 190 140 L 260 250 L 120 280 Z"
-                      fill="none"
-                      stroke="#867448"
+                      fill="rgba(164,124,82,0.06)"
+                      stroke="#A47C52"
                       strokeWidth="1.5"
-                      strokeDasharray="4,4"
+                      strokeDasharray="5,4"
                     />
-                    <text x="75" y="165" fill="#a48f58" fontSize="10" fontFamily="monospace">Legacy Survey (EPSG:24378)</text>
+                    <text x="75" y="160" fill="#718080" fontSize="10" fontFamily="monospace">Legacy Survey (EPSG:24378)</text>
 
-                    {/* Transform arrow */}
+                    {/* Transform arrow — institutional teal */}
                     <path
                       d="M 270 200 Q 320 180 370 190"
                       fill="none"
-                      stroke="#62cfdf"
+                      stroke="#007C83"
                       strokeWidth="1.5"
-                      strokeDasharray="3,3"
                     />
+                    <polygon points="370,186 378,190 370,194" fill="#007C83" />
 
-                    {/* Aligned normalized boundary */}
+                    {/* Aligned normalized boundary — Government teal */}
                     <path
                       d="M 390 150 L 510 130 L 560 260 L 420 270 Z"
-                      fill="rgba(98, 207, 223, 0.08)"
-                      stroke="#62cfdf"
+                      fill="rgba(0,124,131,0.07)"
+                      stroke="#007C83"
                       strokeWidth="2"
                     />
-                    <text x="390" y="120" fill="#62cfdf" fontSize="10" fontFamily="monospace">Normalized UTM 43N (WGS84)</text>
+                    <text x="390" y="118" fill="#005F63" fontSize="10" fontFamily="monospace">Normalized UTM 43N (WGS84)</text>
 
-                    {/* Snapping nodes */}
-                    <circle cx="390" cy="150" r="4" fill="#8ee4aa" />
-                    <circle cx="510" cy="130" r="4" fill="#8ee4aa" />
-                    <circle cx="560" cy="260" r="4" fill="#8ee4aa" />
-                    <circle cx="420" cy="270" r="4" fill="#8ee4aa" />
+                    {/* Snapping nodes — Matched green */}
+                    <circle cx="390" cy="150" r="4" fill="#16845B" />
+                    <circle cx="510" cy="130" r="4" fill="#16845B" />
+                    <circle cx="560" cy="260" r="4" fill="#16845B" />
+                    <circle cx="420" cy="270" r="4" fill="#16845B" />
                   </svg>
                 </div>
 
@@ -207,44 +209,44 @@ export default function PipelineVisual({
               <div className="v-reconcile-scene">
                 <div className="v-spatial-overlay">
                   <svg width="100%" height="100%" viewBox="0 0 600 340" style={{maxHeight: '100%'}}>
-                    {/* Cadastral Parcel Polygon */}
+                    {/* Cadastral Parcel Polygon — Institutional cadastral brown */}
                     <polygon
                       points="120,60 480,50 510,270 150,290"
-                      fill="rgba(212, 180, 101, 0.08)"
-                      stroke="#d4b465"
+                      fill="rgba(164,124,82,0.06)"
+                      stroke="#A47C52"
                       strokeWidth="2"
                     />
-                    <text x="130" y="80" fill="#d4b465" fontSize="11" fontFamily="monospace">Cadastral Parcel #104 (Survey No: 42/B)</text>
+                    <text x="130" y="78" fill="#8B6234" fontSize="11" fontFamily="monospace">Cadastral Parcel #104 (Survey No: 42/B)</text>
 
-                    {/* Extracted Drone Footprint Polygon */}
+                    {/* Extracted Drone Footprint Polygon — Government teal */}
                     <polygon
                       points="210,95 410,85 430,225 230,235"
-                      fill="rgba(98, 207, 223, 0.2)"
-                      stroke="#62cfdf"
-                      strokeWidth="2.2"
+                      fill="rgba(0,124,131,0.10)"
+                      stroke="#007C83"
+                      strokeWidth="2"
                     />
-                    <text x="220" y="115" fill="#62cfdf" fontSize="11" fontFamily="monospace">Drone AI Footprint #BLD-882</text>
+                    <text x="220" y="113" fill="#005F63" fontSize="11" fontFamily="monospace">Drone AI Footprint #BLD-882</text>
 
-                    {/* Spatial Intersection highlight */}
+                    {/* Spatial Intersection highlight — selection teal */}
                     <polygon
                       points="210,95 410,85 430,225 230,235"
-                      fill="rgba(110, 228, 167, 0.15)"
-                      stroke="#6fe4a7"
+                      fill="rgba(0,167,167,0.10)"
+                      stroke="#00A7A7"
                       strokeWidth="1"
-                      strokeDasharray="4,4"
+                      strokeDasharray="5,4"
                     />
 
-                    {/* GNSS Ground Point Observation */}
-                    <circle cx="320" cy="160" r="28" fill="rgba(114, 228, 179, 0.12)" stroke="#72e4b3" strokeWidth="1" strokeDasharray="3,3" />
-                    <circle cx="320" cy="160" r="5" fill="#72e4b3" />
-                    <circle cx="320" cy="160" r="2" fill="#0d1410" />
-                    <text x="335" y="165" fill="#72e4b3" fontSize="11" fontFamily="monospace">GNSS Monument PT-09 (±0.02m)</text>
+                    {/* GNSS Ground Point Observation — GNSS dark teal */}
+                    <circle cx="320" cy="160" r="28" fill="rgba(23,74,77,0.08)" stroke="#174A4D" strokeWidth="1.5" strokeDasharray="4,3" />
+                    <circle cx="320" cy="160" r="5" fill="#174A4D" />
+                    <circle cx="320" cy="160" r="2" fill="#F5F7F7" />
+                    <text x="336" y="163" fill="#174A4D" fontSize="11" fontFamily="monospace">GNSS Monument PT-09 (±0.02m)</text>
 
-                    {/* Live calculation banner overlay */}
-                    <g transform="translate(180, 265)">
-                      <rect width="250" height="42" rx="4" fill="#141c18" stroke="#2a3d32" />
-                      <text x="14" y="18" fill="#8da496" fontSize="9" fontFamily="monospace">CALCULATING INTERSECTION IOUS</text>
-                      <text x="14" y="32" fill="#eaf2ec" fontSize="11" fontFamily="monospace">Area Overlap: 86.4% · Centroid: 1.4m</text>
+                    {/* Calculation info panel — institutional white card */}
+                    <g transform="translate(168, 268)">
+                      <rect width="268" height="44" rx="4" fill="#FFFFFF" stroke="#D5E1DF" strokeWidth="1" />
+                      <text x="14" y="18" fill="#718080" fontSize="9" fontFamily="monospace">CALCULATING INTERSECTION IoU</text>
+                      <text x="14" y="33" fill="#172121" fontSize="11" fontFamily="monospace">Area Overlap: 86.4% · Centroid: 1.4m</text>
                     </g>
                   </svg>
                 </div>
@@ -298,7 +300,7 @@ export default function PipelineVisual({
 
                   <div className="v-score-box">
                     <small>DETERMINISTIC CONFIDENCE</small>
-                    <strong style={{color: '#8ce4a7'}}>
+                    <strong style={{color: '#007C83'}}>
                       {realRecord?.confidence != null ? `${realRecord.confidence} / 100` : '86 / 100'}
                     </strong>
                     <p>Weighted evidence: Geometry 65% + Attributes 35% with GNSS containment bonus.</p>
@@ -316,7 +318,7 @@ export default function PipelineVisual({
                   </div>
                   <div className="v-evidence-row">
                     <span>GNSS Physical Ground Observation</span>
-                    <b style={{color: '#72e4b3'}}>
+                    <b style={{color: '#16845B'}}>
                       {realRecord ? (realRecord.gnss_verified ? 'Verified (Inside boundary)' : 'Not verified') : 'Verified (Inside boundary)'}
                     </b>
                   </div>
@@ -367,24 +369,24 @@ export default function PipelineVisual({
 
                 <div className="v-results-map-preview">
                   <svg width="100%" height="100%" viewBox="0 0 600 240" style={{maxHeight: '100%'}}>
-                    {/* Background parcels representing classification */}
-                    <polygon points="50,40 180,30 200,120 70,130" fill="rgba(82, 196, 141, 0.18)" stroke="#52c48d" strokeWidth="1.8" />
-                    <text x="85" y="85" fill="#52c48d" fontSize="10" fontFamily="monospace">MATCHED #101</text>
+                    {/* Parcels classified by reconciliation status — institutional semantic colours */}
+                    <polygon points="50,40 180,30 200,120 70,130" fill="rgba(22,132,91,0.10)" stroke="#16845B" strokeWidth="1.8" />
+                    <text x="72" y="85" fill="#16845B" fontSize="10" fontFamily="monospace">MATCHED #101</text>
 
-                    <polygon points="210,35 360,25 380,125 230,135" fill="rgba(214, 168, 66, 0.18)" stroke="#d6a842" strokeWidth="1.8" />
-                    <text x="250" y="85" fill="#d6a842" fontSize="10" fontFamily="monospace">NEEDS REVIEW #102</text>
+                    <polygon points="210,35 360,25 380,125 230,135" fill="rgba(196,134,22,0.10)" stroke="#C48616" strokeWidth="1.8" />
+                    <text x="228" y="85" fill="#C48616" fontSize="10" fontFamily="monospace">NEEDS REVIEW #102</text>
 
-                    <polygon points="390,30 540,40 520,130 370,120" fill="rgba(82, 196, 141, 0.18)" stroke="#52c48d" strokeWidth="1.8" />
-                    <text x="425" y="85" fill="#52c48d" fontSize="10" fontFamily="monospace">MATCHED #103</text>
+                    <polygon points="390,30 540,40 520,130 370,120" fill="rgba(22,132,91,0.10)" stroke="#16845B" strokeWidth="1.8" />
+                    <text x="405" y="85" fill="#16845B" fontSize="10" fontFamily="monospace">MATCHED #103</text>
 
-                    <polygon points="60,145 200,140 190,225 50,230" fill="rgba(220, 93, 78, 0.18)" stroke="#dc5d4e" strokeWidth="1.8" />
-                    <text x="80" y="190" fill="#dc5d4e" fontSize="10" fontFamily="monospace">CONFLICT #104</text>
+                    <polygon points="60,145 200,140 190,225 50,230" fill="rgba(196,71,71,0.10)" stroke="#C44747" strokeWidth="1.8" />
+                    <text x="70" y="190" fill="#C44747" fontSize="10" fontFamily="monospace">CONFLICT #104</text>
 
-                    <polygon points="220,145 370,140 380,225 230,230" fill="rgba(82, 196, 141, 0.18)" stroke="#52c48d" strokeWidth="1.8" />
-                    <text x="260" y="190" fill="#52c48d" fontSize="10" fontFamily="monospace">MATCHED #105</text>
+                    <polygon points="220,145 370,140 380,225 230,230" fill="rgba(22,132,91,0.10)" stroke="#16845B" strokeWidth="1.8" />
+                    <text x="248" y="190" fill="#16845B" fontSize="10" fontFamily="monospace">MATCHED #105</text>
 
-                    <polygon points="390,145 530,140 540,225 400,230" fill="rgba(214, 168, 66, 0.18)" stroke="#d6a842" strokeWidth="1.8" />
-                    <text x="425" y="190" fill="#d6a842" fontSize="10" fontFamily="monospace">NEEDS REVIEW #106</text>
+                    <polygon points="390,145 530,140 540,225 400,230" fill="rgba(196,134,22,0.10)" stroke="#C48616" strokeWidth="1.8" />
+                    <text x="406" y="190" fill="#C48616" fontSize="10" fontFamily="monospace">NEEDS REVIEW #106</text>
                   </svg>
                 </div>
               </div>
@@ -446,6 +448,12 @@ export default function PipelineVisual({
                     <small style={{display: 'block', fontSize: '9px', marginTop: '2px'}}>Request Field RTK</small>
                   </div>
                 </div>
+
+                <div className="v-review-footer-action">
+                  <Link to="/review" className="v-open-review-btn">
+                    Open Review Queue <ArrowUpRight size={13} />
+                  </Link>
+                </div>
               </div>
             </motion.div>
           )}
@@ -483,18 +491,24 @@ export default function PipelineVisual({
 
                 <div className="v-decision-status-change">
                   <span className="v-badge-pill pending">Pending Review</span>
-                  <ArrowRight size={18} style={{color: '#65cfdf'}} />
+                  <ArrowRight size={18} style={{color: '#007C83'}} />
                   <span className="v-badge-pill resolved">Accepted & Bound</span>
                 </div>
 
                 <div className="v-decision-signature">
-                  <p style={{margin: '0 0 6px', color: '#b5c7bd', fontStyle: 'italic'}}>
-                    “GNSS ground marker confirms building footprint centroid aligns with legal boundary plot 42/B. Accepted proposal.”
+                  <p style={{margin: '0 0 6px', color: '#4F5C5C', fontStyle: 'italic'}}>
+                    "GNSS ground marker confirms building footprint centroid aligns with legal boundary plot 42/B. Accepted proposal."
                   </p>
                   <div style={{display: 'flex', justifyContent: 'space-between', fontFamily: 'monospace', fontSize: '10px'}}>
-                    <span>Decision: <b style={{color: '#6ee4a7'}}>ACCEPT</b></span>
+                    <span>Decision: <b style={{color: '#16845B'}}>ACCEPT</b></span>
                     <span>Version lock: <b>v.2 (concurrency-safe)</b></span>
                   </div>
+                </div>
+
+                <div className="v-review-footer-action">
+                  <Link to="/review" className="v-open-review-btn">
+                    Review uncertain cases <ArrowUpRight size={13} />
+                  </Link>
                 </div>
               </div>
             </motion.div>
@@ -569,34 +583,36 @@ export default function PipelineVisual({
               <div className="v-trusted-composite">
                 <div className="v-trusted-map-scene">
                   <svg width="100%" height="100%" viewBox="0 0 600 320" style={{maxHeight: '100%'}}>
-                    {/* Unified reconciled cadastral boundary */}
+                    {/* Cadastral boundary — institutional cadastral brown */}
                     <polygon
                       points="100,50 490,40 520,280 130,290"
-                      fill="rgba(82, 196, 141, 0.08)"
-                      stroke="#52c48d"
-                      strokeWidth="2.5"
+                      fill="rgba(164,124,82,0.06)"
+                      stroke="#A47C52"
+                      strokeWidth="2"
                     />
                     
-                    {/* Reconciled building footprint */}
+                    {/* Reconciled building footprint — Government teal */}
                     <polygon
                       points="190,90 410,80 430,230 210,240"
-                      fill="rgba(98, 207, 223, 0.25)"
-                      stroke="#62cfdf"
+                      fill="rgba(0,124,131,0.10)"
+                      stroke="#007C83"
                       strokeWidth="2"
                     />
 
-                    {/* Verified ground truth marker */}
-                    <circle cx="310" cy="155" r="22" fill="rgba(82, 196, 141, 0.15)" stroke="#52c48d" strokeWidth="1.5" />
-                    <circle cx="310" cy="155" r="5" fill="#52c48d" />
+                    {/* GNSS verified ground truth marker — GNSS dark teal */}
+                    <circle cx="310" cy="155" r="22" fill="rgba(23,74,77,0.08)" stroke="#174A4D" strokeWidth="1.5" />
+                    <circle cx="310" cy="155" r="5" fill="#174A4D" />
+                    <circle cx="310" cy="155" r="2" fill="#F5F7F7" />
 
-                    {/* Seal / Emblem badge */}
-                    <g transform="translate(380, 205)">
-                      <rect width="180" height="75" rx="5" fill="#14211a" stroke="#3b694f" strokeWidth="1.5" />
-                      <circle cx="28" cy="38" r="16" fill="#1f362a" stroke="#52c48d" strokeWidth="1" />
-                      <text x="28" y="42" fill="#52c48d" fontSize="13" textAnchor="middle" fontWeight="bold">✓</text>
-                      <text x="54" y="30" fill="#eff5f0" fontSize="11" fontFamily="Manrope, sans-serif" fontWeight="bold">RECONCILED</text>
-                      <text x="54" y="44" fill="#8ca797" fontSize="9" fontFamily="monospace">PARCEL ID: #104</text>
-                      <text x="54" y="58" fill="#52c48d" fontSize="8" fontFamily="monospace">AUTHENTICATED & AUDITED</text>
+                    {/* Official certification badge — institutional white card */}
+                    <g transform="translate(365, 210)">
+                      <rect width="200" height="72" rx="4" fill="#FFFFFF" stroke="#D5E1DF" strokeWidth="1" />
+                      <rect width="200" height="4" rx="2" fill="#007C83" />
+                      <circle cx="28" cy="42" r="16" fill="#EEF7F6" stroke="#007C83" strokeWidth="1.5" />
+                      <text x="28" y="47" fill="#007C83" fontSize="13" textAnchor="middle" fontWeight="bold">✓</text>
+                      <text x="54" y="32" fill="#172121" fontSize="11" fontFamily="Manrope, sans-serif" fontWeight="700">RECONCILED</text>
+                      <text x="54" y="47" fill="#4F5C5C" fontSize="9" fontFamily="monospace">PARCEL ID: #104</text>
+                      <text x="54" y="60" fill="#007C83" fontSize="8" fontFamily="monospace">AUTHENTICATED & AUDITED</text>
                     </g>
                   </svg>
                 </div>
@@ -609,7 +625,7 @@ export default function PipelineVisual({
                       <small>3 Convergent Sources · Complete Mathematical Evidence · Human Decided · Immutable Audit</small>
                     </div>
                   </div>
-                  <span style={{fontFamily: 'monospace', fontSize: '10px', color: '#68d49a'}}>STATE: RESOLVED</span>
+                  <span style={{fontFamily: 'monospace', fontSize: '10px', color: '#16845B', fontWeight: 600}}>STATE: RESOLVED</span>
                 </div>
               </div>
             </motion.div>
