@@ -10,6 +10,7 @@ from services.reference_dataset import SOURCE_ID as REFERENCE_ID, prepared_refer
 from services.reconciliation import execute
 from persistence.verification import verify
 from persistence.store import ReviewConflict
+from persistence.timing import timed
 from data.study_area import STUDY_AREA
 
 router = APIRouter(prefix='/api')
@@ -28,9 +29,11 @@ def store(request):
 @router.get('/health')
 def health(request: Request):
     db = store(request)
-    checked = verify(db)
-    return {'status':'ok' if checked['database_reachable'] else 'degraded', 'storage_mode':db.mode, 'synthetic':True,
-            'postgis_connected':checked['postgis_available'], **checked}
+    with timed('route.health.verify'):
+        checked = verify(db)
+    with timed('route.health.construct'):
+        return {'status':'ok' if checked['database_reachable'] else 'degraded', 'storage_mode':db.mode, 'synthetic':True,
+                'postgis_connected':checked['postgis_available'], **checked}
 
 
 @router.get('/database/verify')
@@ -40,9 +43,10 @@ def database_verify(request: Request):
 
 @router.get('/sources')
 def sources(request: Request, dataset_type: Literal['synthetic_benchmark','real_world_reference'] | None = None):
-    if dataset_type == 'real_world_reference':
-        return [prepared_reference()[0]]
-    return store(request).sources()
+    with timed('route.sources.construct'):
+        if dataset_type == 'real_world_reference':
+            return [prepared_reference()[0]]
+        return store(request).sources()
 
 
 @router.get('/sources/{source_id}')
@@ -99,7 +103,8 @@ def start_run(request: Request,payload: RunInput | None = None):
 
 @router.get('/runs')
 def runs(request: Request):
-    return store(request).runs()
+    with timed('route.runs.construct'):
+        return store(request).runs()
 
 
 @router.get('/runs/{run_id}')
@@ -114,22 +119,34 @@ def run(run_id: str,request: Request):
 def layer(kind: Literal['cadastral','buildings','gnss'],request: Request,source_id: str | None=None,
           representation: Literal['processed','source']='processed'):
     sid = source_id or kind
-    meta = source(sid,request)
+    with timed('route.layer.source_lookup'):
+        meta = source(sid,request)
     if meta['kind'] != kind:
         raise HTTPException(422,'Source type mismatch')
     if sid == REFERENCE_ID:
-        return source_geometry_layer() if representation == 'source' else display_collection(prepared_reference()[1])
+        with timed('route.layer.construct'):
+            return source_geometry_layer() if representation == 'source' else display_collection(prepared_reference()[1])
     if representation == 'source':
         raise HTTPException(422,'Source comparison is available for the bundled reference dataset')
-    return display_layer(store(request),sid)
+    with timed('route.layer.construct'):
+        return display_layer(store(request),sid)
 
 
 @router.get('/results')
 def results(request: Request,run_id: str | None=None):
-    completed = [r for r in store(request).runs() if r['status']=='completed']
-    selected = run(run_id,request) if run_id else (completed[0] if completed else None)
-    return {'type':'FeatureCollection', 'features':store(request).results(selected['id']) if selected else [],
-            'run_id':selected['id'] if selected else None,'summary':selected.get('summary') if selected else None}
+    with timed('route.results.select_run'):
+        all_runs = store(request).runs()
+        if run_id:
+            selected = next((r for r in all_runs if r['id'] == run_id), None)
+            if not selected:
+                raise HTTPException(404, 'Run not found')
+        else:
+            selected = next((r for r in all_runs if r['status'] == 'completed'), None)
+    with timed('route.results.retrieve'):
+        features = store(request).results(selected['id']) if selected else []
+    with timed('route.results.construct'):
+        return {'type':'FeatureCollection', 'features':features,
+                'run_id':selected['id'] if selected else None,'summary':selected.get('summary') if selected else None}
 
 
 def selected_run_id(request: Request, run_id: str | None):

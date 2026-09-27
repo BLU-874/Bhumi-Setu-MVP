@@ -5,12 +5,14 @@ No automatic remote migrations/seeding. CLI operations require explicit invocati
 import json
 import os
 import sqlite3
+from time import perf_counter
 from datetime import datetime, timezone
 from uuid import uuid5, NAMESPACE_URL
 from contextlib import contextmanager
 from pathlib import Path
 
 import psycopg
+from persistence.timing import record, timed
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,10 +26,19 @@ class Store:
     @contextmanager
     def connect(self):
         if self.url:
-            with psycopg.connect(self.url, connect_timeout=5) as conn:
+            started = perf_counter()
+            try:
+                conn = psycopg.connect(self.url, connect_timeout=5)
+            finally:
+                record('db.connect.postgresql', started)
+            with conn:
                 yield conn
         else:
-            conn = sqlite3.connect(self.path, timeout=30)
+            started = perf_counter()
+            try:
+                conn = sqlite3.connect(self.path, timeout=30)
+            finally:
+                record('db.connect.sqlite', started)
             try:
                 conn.execute('PRAGMA foreign_keys=ON')
                 with conn:
@@ -88,11 +99,21 @@ class Store:
 
     def sources(self):
         with self.connect() as c:
-            return [self.decode(r[0]) for r in c.execute('SELECT metadata FROM data_sources ORDER BY id').fetchall()]
+            with timed('db.sources.execute'):
+                cursor = c.execute('SELECT metadata FROM data_sources ORDER BY id')
+            with timed('db.sources.fetch'):
+                rows = cursor.fetchall()
+            with timed('db.sources.decode'):
+                return [self.decode(r[0]) for r in rows]
 
     def features(self, source_id):
         with self.connect() as c:
-            return [self.decode(r[0]) for r in c.execute(self.sql('SELECT payload FROM source_features WHERE source_id=? ORDER BY id'), (source_id,)).fetchall()]
+            with timed('db.features.execute'):
+                cursor = c.execute(self.sql('SELECT payload FROM source_features WHERE source_id=? ORDER BY id'), (source_id,))
+            with timed('db.features.fetch'):
+                rows = cursor.fetchall()
+            with timed('db.features.decode'):
+                return [self.decode(r[0]) for r in rows]
 
     def seed(self, sources):
         # Only used on empty demo storage or by the explicit database CLI.
@@ -143,12 +164,22 @@ class Store:
 
     def runs(self):
         with self.connect() as c:
-            runs = [self.decode(r[0]) for r in c.execute('SELECT payload FROM harmonization_runs').fetchall()]
-            return sorted(runs,key=lambda r:r['started_at'],reverse=True)
+            with timed('db.runs.execute'):
+                cursor = c.execute('SELECT payload FROM harmonization_runs')
+            with timed('db.runs.fetch'):
+                rows = cursor.fetchall()
+            with timed('db.runs.decode_sort'):
+                runs = [self.decode(r[0]) for r in rows]
+                return sorted(runs,key=lambda r:r['started_at'],reverse=True)
 
     def results(self, run_id):
         with self.connect() as c:
-            return [self.decode(r[0]) for r in c.execute(self.sql('SELECT feature FROM harmonized_records WHERE run_id=? ORDER BY id'),(run_id,)).fetchall()]
+            with timed('db.results.execute'):
+                cursor = c.execute(self.sql('SELECT feature FROM harmonized_records WHERE run_id=? ORDER BY id'),(run_id,))
+            with timed('db.results.fetch'):
+                rows = cursor.fetchall()
+            with timed('db.results.decode'):
+                return [self.decode(r[0]) for r in rows]
 
     def ensure_reviews(self, c, run_id):
         rows=c.execute(self.sql('SELECT id,feature FROM harmonized_records WHERE run_id=?'),(run_id,)).fetchall()
