@@ -16,7 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import type { Health, Source, Run, Results, Layers } from './types';
-import { api } from './services/api';
+import { api, type LayerName, type LoadState, type WorkspaceLoadState } from './services/api';
 import Dashboard from './pages/Dashboard';
 const Landing = lazy(() => import('./pages/Landing'));
 import DataSources from './pages/DataSources';
@@ -28,6 +28,12 @@ import { STUDY_AREA } from './config/studyArea';
 import './experience.css';
 
 const empty: Results = { type: 'FeatureCollection', features: [], summary: null, run_id: null };
+const emptyLayer: Layers['cadastral'] = { type: 'FeatureCollection', features: [] };
+const initialLoading = (): WorkspaceLoadState => ({
+  health: { status: 'loading' }, sources: { status: 'loading' }, runs: { status: 'loading' },
+  cadastral: { status: 'loading' }, buildings: { status: 'loading' }, gnss: { status: 'loading' },
+  droneBuildings: { status: 'loading' }, results: { status: 'loading' }
+});
 
 const nav = [
   { to: '/map', label: 'Workspace', icon: Map },
@@ -44,6 +50,9 @@ export default function App() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [results, setResults] = useState<Results>(empty);
   const [layers, setLayers] = useState<Layers | null>(null);
+  const [loading, setLoading] = useState<WorkspaceLoadState>(initialLoading);
+  const loadGeneration = useRef(0);
+  const resultsGeneration = useRef(0);
   const [error, setError] = useState('');
   const [running, setRunning] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -53,9 +62,41 @@ export default function App() {
   const location = useLocation();
   const realWorkspace = location.pathname === '/map' && new URLSearchParams(location.search).get('mode') === 'real_world_reference';
 
-  const refresh = async (preferred?: string, runId?: string) => {
-    try {
-      const [h, ss, rr] = await Promise.all([api.health(), api.sources(), api.runs()]);
+  const refresh = async (preferred?: string, runId?: string, known?: { sources?: Source[]; runs?: Run[] }) => {
+    const generation = ++loadGeneration.current;
+    const resultGeneration = ++resultsGeneration.current;
+    const current = () => generation === loadGeneration.current;
+    setLoading(initialLoading());
+    setLayers(null);
+    setResults(empty);
+    setHealth(null);
+    setError('');
+    const update = (key: keyof WorkspaceLoadState, state: LoadState) => {
+      if (current()) setLoading(previous => ({ ...previous, [key]: state }));
+    };
+    const fail = (key: keyof WorkspaceLoadState, reason: unknown) => {
+      const message = reason instanceof Error ? reason.message : 'Request failed';
+      update(key, { status: 'error', message });
+      if (current()) setError(`${key}: ${message}`);
+    };
+
+    // Health never gates source selection, layers, or saved results.
+    void api.health().then(h => {
+      if (current()) setHealth(h);
+      update('health', { status: 'loaded' });
+    }).catch(e => fail('health', e));
+    const sourceRequest = (known?.sources ? Promise.resolve(known.sources) : api.sources()).then(ss => {
+      if (current()) setSources(ss);
+      update('sources', { status: ss.length ? 'loaded' : 'empty' });
+      return ss;
+    }).catch(e => { fail('sources', e); throw e; });
+    const runRequest = (known?.runs ? Promise.resolve(known.runs) : api.runs()).then(rr => {
+      if (current()) setRuns(rr);
+      update('runs', { status: rr.length ? 'loaded' : 'empty' });
+      return rr;
+    }).catch(e => { fail('runs', e); throw e; });
+
+    const selection = Promise.all([sourceRequest, runRequest]).then(([ss, rr]) => {
       const isLanding = location.pathname === '/';
       const latestCompleted = rr.find(r => r.status === 'completed');
       let activeSource = preferred;
@@ -79,41 +120,56 @@ export default function App() {
           targetRunId = sourceRun?.id;
         }
       }
-      const [res, ll] = await Promise.all([api.results(targetRunId), api.layers(activeSource)]);
-      buildingSourceRef.current = activeSource;
-      setHealth(h);
-      setSources(ss);
-      setRuns(rr);
-      setResults(res);
-      setLayers(ll);
-      setBuildingSource(activeSource);
-      setError('');
-    } catch (e) {
-      setError((e as Error).message || 'Unable to connect to backend');
+      if (current()) {
+        buildingSourceRef.current = activeSource;
+        setBuildingSource(activeSource);
+        setLayers(previous => previous ? { ...previous, buildingSourceId: activeSource } : previous);
+      }
+      return { buildingSourceId: activeSource, sources: ss, runId: targetRunId };
+    });
+
+    // Fixed layers start immediately, before the source/run metadata resolves.
+    const layerRequests = api.layers(selection);
+    for (const key of Object.keys(layerRequests) as LayerName[]) {
+      void layerRequests[key].then(collection => {
+        if (!current()) return;
+        setLayers(previous => ({
+          cadastral: emptyLayer, buildings: emptyLayer, gnss: emptyLayer,
+          buildingSourceId: buildingSourceRef.current,
+          ...previous, [key]: collection
+        }));
+        update(key, { status: collection?.features.length ? 'loaded' : 'empty' });
+      }).catch(e => fail(key, e));
     }
+
+    // Never fall back to another source's latest run when this source has no run.
+    await selection.then(selected => selected.runId ? api.results(selected.runId) : empty).then(res => {
+      if (!current() || resultGeneration !== resultsGeneration.current) return;
+      setResults(res);
+      update('results', { status: res.features.length ? 'loaded' : 'empty' });
+    }).catch(e => {
+      if (resultGeneration === resultsGeneration.current) fail('results', e);
+    });
   };
 
   const handleSelectBuildingSource = async (id: string) => {
     buildingSourceRef.current = id;
     setBuildingSource(id);
-    try {
-      const matched = runs.find(r => r.status === 'completed' && (id === 'buildings' ? (!r.source_ids?.buildings || r.source_ids.buildings === 'buildings') : r.source_ids?.buildings === id));
-      const [res, ll] = await Promise.all([api.results(matched?.id), api.layers(id)]);
-      setResults(res);
-      setLayers(ll);
-    } catch (e) {
-      setError((e as Error).message || 'Unable to switch building source');
-    }
+    await refresh(id, undefined, {
+      sources: ['loaded', 'empty'].includes(loading.sources.status) ? sources : undefined,
+      runs: ['loaded', 'empty'].includes(loading.runs.status) ? runs : undefined
+    });
   };
 
   const importStaged = async () => {
+    const generation = loadGeneration.current;
     setImporting(true);
     setError('');
     try {
       const source = await api.importStaged();
-      await refresh(source.id);
+      if (generation === loadGeneration.current) await refresh(source.id);
     } catch (e) {
-      setError((e as Error).message);
+      if (generation === loadGeneration.current) setError((e as Error).message);
     } finally {
       setImporting(false);
     }
@@ -121,27 +177,37 @@ export default function App() {
 
   useEffect(() => {
     void refresh();
+    return () => {
+      loadGeneration.current++;
+      resultsGeneration.current++;
+    };
   }, []);
 
   const run = async () => {
+    const generation = loadGeneration.current;
     setRunning(true);
     setError('');
     const target = buildingSourceRef.current;
     try {
       const completed = await api.run(target);
-      await refresh(target, completed.id);
+      if (generation === loadGeneration.current) await refresh(target, completed.id);
     } catch (e) {
-      setError((e as Error).message);
+      if (generation === loadGeneration.current) setError((e as Error).message);
     } finally {
       setRunning(false);
     }
   };
 
   const handleClearResults = () => {
-    setResults({ type: 'FeatureCollection', run_id: null, summary: null, features: [] });
+    resultsGeneration.current++;
+    setResults(empty);
+    setLoading(previous => ({ ...previous, results: { status: 'empty' } }));
   };
 
   const latest = runs.find(r => r.id === results.run_id) || null;
+  // Other pages still consume complete base layers; Workspace handles partial ones.
+  const completeLayers = (['cadastral', 'buildings', 'gnss'] as const)
+    .every(key => ['loaded', 'empty'].includes(loading[key].status)) ? layers : null;
   const controls = {
     sources,
     buildingSource,
@@ -151,6 +217,8 @@ export default function App() {
     onRun: run,
     onClearResults: handleClearResults,
     error,
+    loading,
+    onRetryLoad: () => void refresh(buildingSourceRef.current),
   };
 
   if (location.pathname === '/') {
@@ -241,7 +309,7 @@ export default function App() {
             </span>
             <span className="connection">
               <span className={health ? 'ready-dot' : 'offline-dot'} />
-              {health ? (health.postgis_connected ? 'PostGIS connected' : 'Local demo storage') : 'Connecting'}
+              {health ? (health.postgis_connected ? 'PostGIS connected' : 'Local demo storage') : loading.health.status === 'error' ? 'Connection check failed' : 'Connecting'}
             </span>
             <span className="avatar" aria-label="Demo officer">DO</span>
           </div>
@@ -265,7 +333,7 @@ export default function App() {
                 <Dashboard
                   sources={sources}
                   run={latest}
-                  layers={layers}
+                  layers={completeLayers}
                   results={results}
                   running={running}
                   onRun={() => void run()}
@@ -304,7 +372,7 @@ export default function App() {
                       <CheckCircle2 size={14} /> Backend persisted
                     </span>
                   </div>
-                  <ReviewQueue runId={results.run_id} layers={layers} />
+                  <ReviewQueue runId={results.run_id} layers={completeLayers} />
                 </>
               }
             />

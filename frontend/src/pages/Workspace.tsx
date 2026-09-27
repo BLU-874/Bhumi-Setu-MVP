@@ -8,6 +8,13 @@ import MapView from '../components/MapView';
 import EvidencePanel from '../components/EvidencePanel';
 import RunControl, { type RunControls } from '../components/RunControl';
 import { STUDY_AREA } from '../config/studyArea';
+import type { LayerName, WorkspaceLoadState } from '../services/api';
+
+// These extra controls also pass through the existing embedded landing workspace.
+type WorkspaceControls = RunControls & {
+  loading?: WorkspaceLoadState;
+  onRetryLoad?: () => void;
+};
 
 function SyntheticWorkspace({
   layers,
@@ -18,7 +25,7 @@ function SyntheticWorkspace({
   layers: Layers | null;
   results: Results;
   embedded?: boolean;
-  controls?: RunControls;
+  controls?: WorkspaceControls;
 }) {
   const [visible, setVisible] = useState({
     cadastral: true,
@@ -41,16 +48,43 @@ function SyntheticWorkspace({
     setSelected(null);
     setFullEvidence(!embedded);
     setFilter('all');
-  }, [embedded, results.run_id]);
+  }, [embedded, results.run_id, controls?.buildingSource]);
+
+  const loading = controls?.loading;
+  const ready = (key: keyof WorkspaceLoadState) => !loading || ['loaded', 'empty'].includes(loading[key].status);
+  const resultsReady = ready('results');
+  const resultMessage = !resultsReady
+    ? loading?.results.status === 'error' ? `Results failed to load: ${loading.results.message}` : 'Loading results…'
+    : results.features.length ? 'Click a colored parcel for evidence'
+    : results.run_id ? 'Results loaded: no parcels in this run' : 'No saved results for this source. Run harmonization to see scored proposals';
+  const layerLabels: Record<LayerName, string> = {
+    cadastral: 'Cadastral', buildings: 'Buildings', gnss: 'GNSS', droneBuildings: 'Optional drone overlay'
+  };
+  const layerMessages = loading ? (Object.keys(layerLabels) as LayerName[]).flatMap(key => {
+    const state = loading[key];
+    if (state.status === 'loading') return [`Loading ${layerLabels[key].toLowerCase()}…`];
+    if (state.status === 'error') return [`${layerLabels[key]} failed to load: ${state.message}`];
+    if (state.status === 'empty' && (key !== 'droneBuildings' || layers?.droneBuildings)) return [`${layerLabels[key]} loaded: no features`];
+    return [];
+  }) : [];
+  // Leaflet GeoJSON data is set on mount. Keep pending overlays unmounted until
+  // their real response arrives, without changing MapView or user toggle state.
+  const mapVisible = { ...visible,
+    cadastral: visible.cadastral && ready('cadastral'),
+    buildings: visible.buildings && ready('buildings'),
+    gnss: visible.gnss && ready('gnss'),
+    droneBuildings: visible.droneBuildings && ready('droneBuildings'),
+    results: visible.results && resultsReady
+  };
 
   const filtered = {
     ...results,
     features: results.features.filter(f => filter === 'all' || f.properties.status === filter)
   };
 
-  const matchedCount = results.summary?.matched ?? results.features.filter(f => f.properties.status === 'matched').length;
-  const reviewCount = results.summary?.needs_review ?? results.features.filter(f => f.properties.status === 'needs_review').length;
-  const conflictCount = results.summary?.conflict ?? results.features.filter(f => f.properties.status === 'conflict').length;
+  const matchedCount = resultsReady ? results.summary?.matched ?? results.features.filter(f => f.properties.status === 'matched').length : '—';
+  const reviewCount = resultsReady ? results.summary?.needs_review ?? results.features.filter(f => f.properties.status === 'needs_review').length : '—';
+  const conflictCount = resultsReady ? results.summary?.conflict ?? results.features.filter(f => f.properties.status === 'conflict').length : '—';
 
   const built = controls?.sources.find(s => s.id === controls.buildingSource);
   const isStagedDrone = controls
@@ -119,15 +153,16 @@ function SyntheticWorkspace({
             <select
               id="workspace-result-filter"
               value={filter}
+              disabled={!resultsReady}
               onChange={e => {
                 setFilter(e.target.value);
                 setSelected(null);
               }}
             >
-              <option value="all">All ({results.features.length})</option>
-              <option value="matched">Matched ({results.features.filter(f => f.properties.status === 'matched').length})</option>
-              <option value="needs_review">Needs review ({results.features.filter(f => f.properties.status === 'needs_review').length})</option>
-              <option value="conflict">Conflict ({results.features.filter(f => f.properties.status === 'conflict').length})</option>
+              <option value="all">{resultsReady ? `All (${results.features.length})` : loading?.results.status === 'error' ? 'Results unavailable' : 'Loading results…'}</option>
+              <option value="matched">Matched ({matchedCount})</option>
+              <option value="needs_review">Needs review ({reviewCount})</option>
+              <option value="conflict">Conflict ({conflictCount})</option>
             </select>
           </label>
         </div>
@@ -143,18 +178,20 @@ function SyntheticWorkspace({
         {/* Center Pane: Dominant Interactive Map */}
         <section className="workspace-map-section">
           <div className="workspace-map">
-            {layers ? (
+            {layers && ready('cadastral') ? (
               <MapView
                 layers={layers}
                 results={filtered}
-                visible={visible}
+                visible={mapVisible}
                 onSelect={select}
                 selected={selected}
                 basemap={basemap}
                 satellite={satellite}
               />
             ) : (
-              <div className="empty">Loading map layers…</div>
+              <div className="empty" role={loading?.cadastral.status === 'error' ? 'alert' : 'status'}>
+                {loading?.cadastral.status === 'error' ? `Cadastral layer failed to load: ${loading.cadastral.message}` : 'Loading map layers…'}
+              </div>
             )}
             <div className="map-caption">
               <span>
@@ -167,11 +204,12 @@ function SyntheticWorkspace({
           </div>
 
           <div className="map-bottom">
-            <span>
+            <span role="status" aria-live="polite">
               <MousePointer2 size={14} />{' '}
-              {results.features.length
-                ? 'Click a colored parcel for evidence'
-                : 'Run harmonization to see scored proposals'}
+              {[resultMessage, ...layerMessages].join(' · ')}
+              {loading && Object.values(loading).some(state => state.status === 'error') && controls?.onRetryLoad && (
+                <> <button className="text-link" onClick={controls.onRetryLoad}>Retry loading</button></>
+              )}
             </span>
             <div className="legend">
               <span className="matched">Matched</span>
@@ -225,7 +263,7 @@ function SyntheticWorkspace({
 
               <div className="run-overview-metric-grid">
                 <div className="overview-metric-tile">
-                  <strong className="metric-number">{results.features.length}</strong>
+                  <strong className="metric-number">{resultsReady ? results.features.length : '—'}</strong>
                   <span className="metric-label">PARCELS EVALUATED</span>
                 </div>
                 <div className="overview-metric-tile">
@@ -270,7 +308,7 @@ function SyntheticWorkspace({
                     <span className="result-chip-lbl">Conflict</span>
                   </div>
                 </div>
-                {isStagedDrone && conflictCount > 0 && (
+                {isStagedDrone && typeof conflictCount === 'number' && conflictCount > 0 && (
                   <p className="conflict-context-note" style={{ marginTop: '8px' }}>
                     Many conflict cases in this staged run have no available drone footprint candidate because the fixture contains only {buildingCount} building footprints.
                   </p>
@@ -282,7 +320,9 @@ function SyntheticWorkspace({
                   <Crosshair size={20} />
                 </div>
                 <p className="select-prompt-text">
-                  Select a colored parcel on the map to inspect its individual evidence dossier, deterministic score, and ML candidate ranking.
+                  {resultsReady && results.features.length
+                    ? 'Select a colored parcel on the map to inspect its individual evidence dossier, deterministic score, and ML candidate ranking.'
+                    : resultMessage}
                 </p>
               </div>
             </aside>
@@ -309,13 +349,13 @@ function SyntheticWorkspace({
             </span>
             <span className="status-strip-divider" />
             <span className="status-strip-metric total">
-              <b>{results.features.length}</b> PARCELS EVALUATED
+              <b>{resultsReady ? results.features.length : '—'}</b> PARCELS EVALUATED
             </span>
           </div>
         </div>
         <div className="status-strip-right">
           <span className="status-strip-run-label">
-            RUN ID: <code>{results.run_id ? results.run_id.slice(0, 10) : 'None'}</code>
+            RUN ID: <code>{results.run_id ? results.run_id.slice(0, 10) : !resultsReady ? loading?.results.status === 'error' ? 'Unavailable' : 'Loading…' : 'None'}</code>
           </span>
           <Link to="/audit" className="status-strip-nav-link" title="Open immutable audit trail">
             AUDIT TRAIL <ArrowRight size={13} />
@@ -365,7 +405,7 @@ export default function Workspace(props: {
   layers: Layers | null;
   results: Results;
   embedded?: boolean;
-  controls?: RunControls;
+  controls?: WorkspaceControls;
   storyMode?: boolean;
 }) {
   const [params, setParams] = useSearchParams();
