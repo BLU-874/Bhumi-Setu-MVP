@@ -8,6 +8,7 @@ export type RunControls = {
   buildingSource: string;
   setBuildingSource: (id: string) => void;
   running: boolean;
+  processingRun?: Run | null;
   run: Run | null;
   onRun: () => Promise<void>;
   onClearResults?: () => void;
@@ -32,7 +33,7 @@ export default function RunControl({
   results: Results;
   embedded?: boolean;
 }) {
-  const { sources, buildingSource, setBuildingSource, running, run, onRun, onClearResults, error } = controls;
+  const { sources, buildingSource, setBuildingSource, running, processingRun, run, onRun, onClearResults, error } = controls;
   const [stage, setStage] = useState(0);
   const [showRerunModal, setShowRerunModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
@@ -50,6 +51,10 @@ export default function RunControl({
   const buildingCount = buildingSource === 'buildings' ? 475 : (built?.feature_count ?? 6);
   const canRun = !!built && sources.some(s => s.id === 'cadastral') && sources.some(s => s.id === 'gnss');
   const hasCompletedForSource = !!summary && !!results.run_id && ((run?.source_ids?.buildings || 'buildings') === buildingSource);
+  const engineRun = processingRun && (processingRun.source_ids?.buildings || 'buildings') === buildingSource
+    ? processingRun : (run?.id === results.run_id ? run : null);
+  const engineCompleted = !running && !error && engineRun?.status === 'completed' &&
+    (engineRun.source_ids?.buildings || 'buildings') === buildingSource;
 
   const handleConfirmRerun = async () => {
     setShowRerunModal(false);
@@ -156,22 +161,23 @@ export default function RunControl({
 
       {/* 3. Action / Result Section */}
       <div className="harmonization-action-section">
-        {running ? (
+        {(running || engineCompleted) && (
           <div className="run-progress-box" role="status">
             <div className="run-progress-head">
-              <LoaderCircle size={14} className="spin" />
+              {engineCompleted ? <CheckCircle2 size={14} /> : <LoaderCircle size={14} className="spin" />}
               <span>Processing engine</span>
             </div>
             <ol className="run-stages-list">
               {stages.map((name, i) => (
-                <li key={name} className={i === stage ? 'active' : i < stage ? 'done' : ''}>
-                  {i < stage ? <Check size={10} /> : i === stage ? <span className="stage-pulse" /> : null}
+                <li key={name} className={engineCompleted || i < stage ? 'done' : i === stage ? 'active' : ''}>
+                  {engineCompleted || i < stage ? <Check size={10} /> : i === stage ? <span className="stage-pulse" /> : null}
                   {name}
                 </li>
               ))}
             </ol>
           </div>
-        ) : hasCompletedForSource ? (
+        )}
+        {running ? null : hasCompletedForSource ? (
           <div className="completed-summary-box">
             <div className="completed-badge">
               <CheckCircle2 size={13} /> RECONCILIATION COMPLETE

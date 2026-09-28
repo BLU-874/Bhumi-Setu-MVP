@@ -55,6 +55,7 @@ export default function App() {
   const resultsGeneration = useRef(0);
   const [error, setError] = useState('');
   const [running, setRunning] = useState(false);
+  const [processingRun, setProcessingRun] = useState<Run | null>(null);
   const [menu, setMenu] = useState(false);
   const [buildingSource, setBuildingSource] = useState('buildings');
   const buildingSourceRef = useRef('buildings');
@@ -186,20 +187,24 @@ export default function App() {
   const run = async () => {
     const generation = loadGeneration.current;
     setRunning(true);
+    setProcessingRun(null);
     setError('');
     const target = buildingSourceRef.current;
+    let completed: Run | null = null;
     try {
-      const completed = await api.run(target);
-      if (generation === loadGeneration.current) await refresh(target, completed.id);
+      completed = await api.run(target);
+      if (completed.status === 'completed' && generation === loadGeneration.current) setProcessingRun(completed);
     } catch (e) {
       if (generation === loadGeneration.current) setError((e as Error).message);
     } finally {
       setRunning(false);
     }
+    if (completed && generation === loadGeneration.current) await refresh(target, completed.id);
   };
 
   const handleClearResults = () => {
     resultsGeneration.current++;
+    setProcessingRun(null);
     setResults(empty);
     setLoading(previous => ({ ...previous, results: { status: 'empty' } }));
   };
@@ -213,6 +218,7 @@ export default function App() {
     buildingSource,
     setBuildingSource: (id: string) => void handleSelectBuildingSource(id),
     running,
+    processingRun,
     run: latest,
     onRun: run,
     onClearResults: handleClearResults,
