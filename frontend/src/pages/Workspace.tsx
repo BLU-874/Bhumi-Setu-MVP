@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import WorkspaceModes from '../components/WorkspaceModes';
 import ReferenceWorkspace from '../components/ReferenceWorkspace';
@@ -35,6 +35,7 @@ function SyntheticWorkspace({
     droneBuildings: true
   });
   const [selected, setSelected] = useState<ResultFeature | null>(null);
+  const evidenceColumn = useRef<HTMLElement>(null);
   const [fullEvidence, setFullEvidence] = useState(!embedded);
   const select = (feature: ResultFeature) => {
     setSelected(feature);
@@ -85,6 +86,12 @@ function SyntheticWorkspace({
   const matchedCount = resultsReady ? results.summary?.matched ?? results.features.filter(f => f.properties.status === 'matched').length : '—';
   const reviewCount = resultsReady ? results.summary?.needs_review ?? results.features.filter(f => f.properties.status === 'needs_review').length : '—';
   const conflictCount = resultsReady ? results.summary?.conflict ?? results.features.filter(f => f.properties.status === 'conflict').length : '—';
+  const hasCompletedResults = resultsReady && !!results.run_id && !!results.summary &&
+    (!controls?.run || controls.run.status === 'completed');
+  const contributions = [
+    { label: 'Geometry', value: selected?.properties.confidence_explanation?.geometry_contribution },
+    { label: 'Attributes', value: selected?.properties.confidence_explanation?.attribute_contribution }
+  ].filter(({ value }) => typeof value === 'number' && Number.isFinite(value));
 
   const built = controls?.sources.find(s => s.id === controls.buildingSource);
   const isStagedDrone = controls
@@ -176,6 +183,7 @@ function SyntheticWorkspace({
         </aside>
 
         {/* Center Pane: Dominant Interactive Map */}
+        <div className="workspace-map-column">
         <section className="workspace-map-section">
           <div className="workspace-map">
             {layers && ready('cadastral') ? (
@@ -219,8 +227,63 @@ function SyntheticWorkspace({
           </div>
         </section>
 
+        <section className="workspace-reconciliation-results" aria-label="Reconciliation summary">
+          <header className="reconciliation-results-header">
+            <h2>RECONCILIATION RESULTS</h2>
+            {resultsReady && results.run_id && <span>RUN <code>{results.run_id.slice(0, 8)}</code></span>}
+          </header>
+          {!resultsReady ? (
+            <p className="reconciliation-results-empty" role={loading?.results.status === 'error' ? 'alert' : 'status'}>{resultMessage}</p>
+          ) : hasCompletedResults ? (
+            <>
+              <dl className="reconciliation-results-metrics">
+                <div className="matched"><dt>MATCHED</dt><dd>{matchedCount}</dd></div>
+                <div className="needs_review"><dt>NEEDS REVIEW</dt><dd>{reviewCount}</dd></div>
+                <div className="conflict"><dt>CONFLICT</dt><dd>{conflictCount}</dd></div>
+                <div><dt>EVALUATED</dt><dd>{results.summary?.total_parcels ?? results.features.length}</dd></div>
+              </dl>
+              {selected ? (
+                <>
+                  <div className="reconciliation-selected-parcel">
+                    <strong>{selected.properties.parcel_id}</strong>
+                    <span className={`status ${selected.properties.status}`}>{selected.properties.status.replace('_', ' ').toUpperCase()}</span>
+                    <span>{selected.properties.deterministic_confidence ?? selected.properties.confidence} / 100</span>
+                    <span>{selected.properties.ml_rank != null ? `ML #${selected.properties.ml_rank}` : 'ML rank unavailable'}</span>
+                    <span>{selected.properties.gnss_verified ? 'GNSS ✓' : 'GNSS unverified'}</span>
+                  </div>
+                  {contributions.length > 0 && (
+                    <div className="reconciliation-contributions">
+                      {contributions.map(({ label, value }) => (
+                        <label key={label}>
+                          <span>{label}</span>
+                          <progress max={100} value={value} aria-label={`${label} contribution`} />
+                          <small>{value} pts</small>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  <button className="reconciliation-evidence-action" onClick={() => {
+                    setFullEvidence(true);
+                    evidenceColumn.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                  }}>
+                    VIEW FULL EVIDENCE <ArrowRight size={14} />
+                  </button>
+                </>
+              ) : (
+                <p className="reconciliation-results-prompt">Select a parcel on the map to inspect its reconciliation evidence.</p>
+              )}
+            </>
+          ) : (
+            <div className="reconciliation-results-empty">
+              <strong>No completed harmonization run yet.</strong>
+              <p>Run harmonization to generate reconciliation results.</p>
+            </div>
+          )}
+        </section>
+        </div>
+
         {/* Right Pane: Evidence Investigation Dossier */}
-        <aside className="workspace-evidence-column">
+        <aside className="workspace-evidence-column" ref={evidenceColumn}>
           {selected ? (
             fullEvidence ? (
               <EvidencePanel feature={selected} onClose={() => setSelected(null)} />
@@ -330,73 +393,6 @@ function SyntheticWorkspace({
         </aside>
       </div>
 
-      {/* 3. Persistent Bottom Status Strip */}
-      <div className="workspace-bottom-status-strip" aria-label="Reconciliation summary">
-        <div className="status-strip-left">
-          <span className="status-strip-kicker">RECONCILIATION RESULT</span>
-          <div className="status-strip-metrics">
-            <span className="status-strip-metric matched">
-              <i className="status-indicator-dot matched" />
-              <b>{matchedCount}</b> MATCHED
-            </span>
-            <span className="status-strip-metric review">
-              <i className="status-indicator-dot review" />
-              <b>{reviewCount}</b> NEEDS REVIEW
-            </span>
-            <span className="status-strip-metric conflict">
-              <i className="status-indicator-dot conflict" />
-              <b>{conflictCount}</b> CONFLICT
-            </span>
-            <span className="status-strip-divider" />
-            <span className="status-strip-metric total">
-              <b>{resultsReady ? results.features.length : '—'}</b> PARCELS EVALUATED
-            </span>
-          </div>
-        </div>
-        <div className="status-strip-right">
-          <span className="status-strip-run-label">
-            RUN ID: <code>{results.run_id ? results.run_id.slice(0, 10) : !resultsReady ? loading?.results.status === 'error' ? 'Unavailable' : 'Loading…' : 'None'}</code>
-          </span>
-          <Link to="/audit" className="status-strip-nav-link" title="Open immutable audit trail">
-            AUDIT TRAIL <ArrowRight size={13} />
-          </Link>
-          <Link to="/review" className="status-strip-nav-link review-link" title="Open officer review queue">
-            REVIEW QUEUE <ArrowRight size={13} />
-          </Link>
-        </div>
-      </div>
-
-      {/* 4. Standalone-only below-map sprawl (hidden in embedded mode) */}
-      {!embedded && (
-        <>
-          <div className="planned-map-layers">
-            {['Municipal GIS', 'Utilities', 'Drone / ORI imagery'].map(label => (
-              <label key={label}>
-                <input type="checkbox" disabled />
-                {label} · Planned
-              </label>
-            ))}
-          </div>
-
-          {!selected && results.features.length > 0 && (
-            <section className="panel">
-              <div className="section-top">
-                <h2>Inspect a record</h2>
-                <span className="muted">{filtered.features.length} results in current filter</span>
-              </div>
-              <div className="record-list">
-                {filtered.features.slice(0, 20).map(f => (
-                  <button onClick={() => select(f)} key={f.properties.parcel_id}>
-                    <b>{f.properties.parcel_id}</b>
-                    <span className={`status ${f.properties.status}`}>{f.properties.confidence}%</span>
-                    <small>{f.properties.validation_flags[0] || 'No validation flags'}</small>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-        </>
-      )}
     </div>
   );
 }
