@@ -34,21 +34,24 @@ def create_app(database=None):
     @app.middleware('http')
     async def diagnostic_timing(request: Request, call_next):
         path = request.url.path
-        measured = request.method == 'GET' and path in {
+        measured = (request.method == 'POST' and path == '/api/runs') or (request.method == 'GET' and path in {
             '/api/health', '/api/sources', '/api/runs', '/api/results',
             '/api/layers/cadastral', '/api/layers/buildings', '/api/layers/gnss'
-        }
+        })
         if not measured:
             return await call_next(request)
         token = request_id.set(uuid4().hex[:12])
         started = perf_counter()
         logging.getLogger('bhumi.performance').warning(
-            'perf request_id=%s stage=request.start route=%s', request_id.get(), path)
+            'perf request_id=%s stage=request.start route=%s method=%s', request_id.get(), path, request.method)
+        response_status = 500
         try:
             response = await call_next(request)
+            response_status = response.status_code
             return response
         finally:
-            record('request.total', started, route=path)
+            record('route.runs.total' if request.method == 'POST' else 'request.total', started,
+                   route=path, http_status=response_status)
             request_id.reset(token)
 
     app.add_middleware(CORSMiddleware,

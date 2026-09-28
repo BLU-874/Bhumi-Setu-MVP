@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import psycopg
-from persistence.timing import record, timed
+from persistence.timing import record, timed, event, DatabaseCalls
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -31,8 +31,16 @@ class Store:
                 conn = psycopg.connect(self.url, connect_timeout=5)
             finally:
                 record('db.connect.postgresql', started)
-            with conn:
-                yield conn
+            transaction_exit = None
+            try:
+                with conn:
+                    try:
+                        yield conn
+                    finally:
+                        transaction_exit = perf_counter()
+            finally:
+                if transaction_exit is not None:
+                    record('db.transaction_exit', transaction_exit)
         else:
             started = perf_counter()
             try:
@@ -142,25 +150,43 @@ class Store:
         if not self.url:
             return None
         with self.connect() as c:
-            rows = c.execute('''SELECT p.id,b.payload FROM source_features p
-                JOIN source_features b ON ST_Intersects(p.geometry,b.geometry)
-                WHERE p.source_id=%s AND b.source_id=%s ORDER BY p.id,b.id''',
-                (parcel_source, building_source)).fetchall()
-            out = {}
-            for pid, payload in rows:
-                out.setdefault(pid, []).append(self.decode(payload))
+            event('db.candidates.spatial_query.start')
+            with timed('db.candidates.spatial_execute'):
+                cursor = c.execute('''SELECT p.id,b.payload FROM source_features p
+                    JOIN source_features b ON ST_Intersects(p.geometry,b.geometry)
+                    WHERE p.source_id=%s AND b.source_id=%s ORDER BY p.id,b.id''',
+                    (parcel_source, building_source))
+            with timed('db.candidates.fetch'):
+                rows = cursor.fetchall()
+            with timed('db.candidates.decode'):
+                out = {}
+                for pid, payload in rows:
+                    out.setdefault(pid, []).append(self.decode(payload))
+            event('db.candidates.spatial_query.complete', candidate_count=len(rows))
             return out
 
     def save_run(self, run, features=None):
-        with self.connect() as c:
-            c.execute(self.sql('''INSERT INTO harmonization_runs(id,project_id,status,payload) VALUES (?,?,?,?)
-                ON CONFLICT(id) DO UPDATE SET status=excluded.status,payload=excluded.payload'''),
-                (run['id'],'pune-demo',run['status'],json.dumps(run)))
-            if features is not None:
-                for f in features:
-                    c.execute(self.sql('INSERT INTO harmonized_records(id,run_id,feature) VALUES (?,?,?) ON CONFLICT(run_id,id) DO NOTHING'),
-                              (f['properties']['parcel_id'],run['id'],json.dumps(f)))
-                self.ensure_reviews(c,run['id'])
+        started = perf_counter()
+        calls = DatabaseCalls()
+        event('db.save_run.start', has_features=features is not None, audit_operation_count=0)
+        try:
+            with self.connect() as c:
+                calls.execute(c, self.sql('''INSERT INTO harmonization_runs(id,project_id,status,payload) VALUES (?,?,?,?)
+                    ON CONFLICT(id) DO UPDATE SET status=excluded.status,payload=excluded.payload'''),
+                    (run['id'],'pune-demo',run['status'],json.dumps(run)))
+                if features is not None:
+                    for index, f in enumerate(features, 1):
+                        calls.execute(c, self.sql('INSERT INTO harmonized_records(id,run_id,feature) VALUES (?,?,?) ON CONFLICT(run_id,id) DO NOTHING'),
+                                      (f['properties']['parcel_id'],run['id'],json.dumps(f)))
+                        if index % 100 == 0:
+                            calls.report('db.save_run.progress')
+                            event('db.save_run.records', result_count=index)
+                    self.ensure_reviews(c,run['id'], calls)
+                event('db.save_run.transaction_exit.start')
+        finally:
+            calls.report('db.save_run.calls')
+            calls.accumulate()
+            record('db.save_run.total', started)
 
     def runs(self):
         with self.connect() as c:
@@ -181,14 +207,30 @@ class Store:
             with timed('db.results.decode'):
                 return [self.decode(r[0]) for r in rows]
 
-    def ensure_reviews(self, c, run_id):
-        rows=c.execute(self.sql('SELECT id,feature FROM harmonized_records WHERE run_id=?'),(run_id,)).fetchall()
-        for record_id,raw in rows:
-            p=self.decode(raw)['properties']
-            if p.get('review_required'):
-                case_id=str(uuid5(NAMESPACE_URL,f'bhumi-setu:{run_id}:{record_id}'))
-                c.execute(self.sql("INSERT INTO review_cases(id,run_id,record_id,status,version) VALUES (?,?,?,'pending',0) ON CONFLICT(run_id,record_id) DO NOTHING"),
-                          (case_id,run_id,record_id))
+    def ensure_reviews(self, c, run_id, calls=None):
+        calls = calls if calls is not None else DatabaseCalls()
+        started = perf_counter()
+        initial_count, initial_seconds = calls.count, calls.seconds
+        review_count = 0
+        event('db.review_cases.start')
+        try:
+            rows=calls.fetchall(calls.execute(c, self.sql('SELECT id,feature FROM harmonized_records WHERE run_id=?'),(run_id,)))
+            for record_id,raw in rows:
+                p=self.decode(raw)['properties']
+                if p.get('review_required'):
+                    case_id=str(uuid5(NAMESPACE_URL,f'bhumi-setu:{run_id}:{record_id}'))
+                    calls.execute(c, self.sql("INSERT INTO review_cases(id,run_id,record_id,status,version) VALUES (?,?,?,'pending',0) ON CONFLICT(run_id,record_id) DO NOTHING"),
+                                  (case_id,run_id,record_id))
+                    review_count += 1
+                    if review_count % 100 == 0:
+                        event('db.review_cases.progress', review_case_count=review_count,
+                              persistence_operation_count=calls.count-initial_count)
+        finally:
+            operation_count = calls.count - initial_count
+            db_seconds = calls.seconds - initial_seconds
+            record('db.review_cases.total', started, review_case_count=review_count,
+                   persistence_operation_count=operation_count, db_ms=round(db_seconds*1000, 3),
+                   average_db_call_ms=round(db_seconds*1000/operation_count, 3) if operation_count else 0)
 
     def backfill_reviews(self):
         with self.connect() as c:

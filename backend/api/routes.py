@@ -91,7 +91,8 @@ def start_run(request: Request,payload: RunInput | None = None):
     if not run_lock.acquire(blocking=False):
         raise HTTPException(409,'A harmonization run is already processing')
     try:
-        return execute(store(request),(payload or RunInput()).model_dump())
+        with timed('route.runs.execute'):
+            return execute(store(request),(payload or RunInput()).model_dump())
     except ValueError as exc:
         raise HTTPException(422,str(exc))
     except Exception:
